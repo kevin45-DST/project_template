@@ -1,5 +1,4 @@
 # Project_template
-# Project Template
 
 ## Présentation
 
