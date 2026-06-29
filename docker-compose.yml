@@ -1,0 +1,109 @@
+# ==============
+# Docker Compose
+# ==============
+
+services:
+
+  # =======
+  # Service
+  # =======
+  <service_name>:
+
+    # -----
+    # Build
+    # -----
+    build:
+      context: .
+      dockerfile: <Dockerfile>
+
+      # Optional
+      args:
+        <ARG_NAME>: <value>
+
+    # Alternative to build
+    # image: <image>:<tag>
+
+    # ---------
+    # Container
+    # ---------
+    container_name: <container_name>
+    hostname: <hostname>
+
+    # --------------
+    # Restart policy
+    # --------------
+    restart: <no|always|unless-stopped|on-failure>
+
+    # ---------------------
+    # Environment variables
+    # ---------------------
+    environment:
+      <ENV_NAME>: <value>
+      <ENV_NAME>: <value>
+
+    # Or
+    # env_file:
+    #   - .env
+
+    # -----
+    # Ports
+    # -----
+    ports:
+      - "<host_port>:<container_port>"
+
+    # Exemple :
+    # - "8000:8000"
+
+    # -------
+    # Volumes
+    # -------
+    volumes:
+      - ./<host_directory>:/<container_directory>
+      - ./<config_file>:<container_path>
+
+    # --------
+    # Networks
+    # --------
+    networks:
+      - <network_name>
+
+    # ------------
+    # Dependencies
+    # ------------
+    depends_on:
+      - <dependency_service>
+
+    # ----------------------
+    # Healthcheck (optional)
+    # ----------------------
+    healthcheck:
+      test: ["CMD", "<healthcheck_command>"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+    # --------------------------
+    # Startup command (optional)
+    # --------------------------
+    command: >
+      <command>
+
+    # Exemple :
+    # command: >
+    #   uvicorn src.main:app --host 0.0.0.0 --port 8000
+
+# ========
+# Networks
+# ========
+networks:
+
+  <network_name>:
+    driver: bridge
+
+# =======
+# Volumes
+# =======
+volumes:
+
+  <volume_name>:
+```
