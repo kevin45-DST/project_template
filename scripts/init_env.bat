@@ -38,7 +38,8 @@ echo =====================================
 echo Creating Jupyter kernel...
 echo =====================================
 
-python -m ipykernel install --user `
+python -m ipykernel install `
+    --sys-prefix `
     --name $ProjectName `
     --display-name "Python ($ProjectName)"
 
