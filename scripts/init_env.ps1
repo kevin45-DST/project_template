@@ -51,5 +51,26 @@ pip install -r requirements.txt
 Write-Host Done.
 
 Write-Host =====================================
+Write-Host Creating project folders...
+Write-Host =====================================
+
+$folders = @(
+    "data/raw",
+    "data/processed",
+    "logs",
+    "models",
+	"outputs",
+    "notebooks",
+    "src",
+    "tests"
+)
+
+foreach ($folder in $folders) {
+    New-Item -ItemType Directory -Force -Path $folder | Out-Null
+}
+
+Write-Host Done.
+
+Write-Host =====================================
 Write-Host Environment is ready!
 Write-Host =====================================
