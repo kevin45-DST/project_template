@@ -1,3 +1,5 @@
+$ProjectName = Split-Path -Leaf $PWD
+
 Write-Host =====================================
 Write-Host Creating virtual environment...
 Write-Host =====================================
@@ -19,6 +21,24 @@ Write-Host Upgrading pip...
 Write-Host =====================================
 
 python -m pip install --upgrade pip
+
+Write-Host Done.
+
+Write-Host =====================================
+Write-Host Installing ipykernel...
+Write-Host =====================================
+
+pip install ipykernel
+
+Write-Host Done.
+
+Write-Host =====================================
+Write-Host Creating Jupyter kernel...
+Write-Host =====================================
+
+python -m ipykernel install --user `
+    --name $ProjectName `
+    --display-name "Python ($ProjectName)"
 
 Write-Host Done.
 

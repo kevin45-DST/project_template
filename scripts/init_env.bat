@@ -1,5 +1,7 @@
 @echo off
 
+for %%I in (.) do set ProjectName=%%~nxI
+
 echo =====================================
 echo Creating virtual environment...
 echo =====================================
@@ -21,6 +23,24 @@ echo Upgrading pip...
 echo =====================================
 
 python -m pip install --upgrade pip
+
+echo Done.
+
+echo =====================================
+echo Installing ipykernel...
+echo =====================================
+
+pip install ipykernel
+
+echo Done.
+
+echo =====================================
+echo Creating Jupyter kernel...
+echo =====================================
+
+python -m ipykernel install --user `
+    --name $ProjectName `
+    --display-name "Python ($ProjectName)"
 
 echo Done.
 
