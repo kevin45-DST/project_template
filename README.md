@@ -1,176 +1,166 @@
-# Project_template
+# 🧠 ML Project Template — Framework & Toolbox pour une ingénierie ML lisible et durable
 
-## Présentation
+## 🎯 Pourquoi ce projet existe
 
-Ce dépôt fournit un modèle de structure pour démarrer rapidement des projets de développement et de machine learning.
+La plupart des projets de machine learning échouent rarement à cause des modèles eux-mêmes, mais à cause de leur environnement :
 
-L'objectif n'est pas uniquement de gagner du temps lors de la création d'un projet, mais également de mettre en place un cadre de travail structuré et homogène.
+- structure de projet confuse
+- logique de préprocessing dispersée ou implicite
+- pipelines difficiles à lire et à maintenir
+- duplication de code entre expériences
+- manque de reproductibilité
+- forte friction cognitive pour les développeurs
 
-Ce cadre permet de :
+Après près de 20 ans d’expérience en développement logiciel et architecture technique, j’ai constaté un problème récurrent :
 
-- standardiser l'organisation des projets ;
-- faciliter la compréhension du code ;
-- améliorer la maintenance ;
-- favoriser la reproductibilité ;
-- simplifier la collaboration entre développeurs.
+> Les développeurs passent trop de temps à composer avec l’environnement de travail, et pas assez de temps à résoudre le problème métier.
 
----
+Ce projet est une réponse directe à ce constat.
 
-## Pourquoi utiliser un template ?
+## 🧭 Philosophie générale
 
-La création d'un nouveau projet implique souvent de refaire les mêmes tâches :
+Ce framework repose sur une idée simple :
 
-- création de l'arborescence ;
-- configuration de l'environnement ;
-- gestion des dépendances ;
-- préparation des outils de déploiement ;
-- organisation des données, modèles et sources.
+> La qualité d’un système de machine learning dépend autant de son environnement que de ses modèles.
 
-Ce template fournit une base commune afin de permettre de se concentrer sur le développement de la solution plutôt que sur la configuration initiale.
+Cela implique :
+- réduire la friction cognitive
+- rendre la structure prévisible
+- expliciter les responsabilités
+- séparer l’exécution des outils
+- privilégier l’ergonomie développeur plutôt que la complexité technique
 
-Une structure claire permet également à une personne extérieure au projet de comprendre rapidement son fonctionnement.
+## 🧱 Architecture : Framework vs Toolbox
 
----
+Le projet est séparé en deux couches distinctes.
 
-## Philosophie du projet
+### 🧩 1. Framework (en constuction)
 
-Ce template repose sur plusieurs principes.
+Le framework est responsable de l’exécution.
 
-### Séparation des responsabilités
+Il ne contient pas de logique métier ML.
 
-Chaque élément du projet possède un rôle clairement défini :
+Il orchestre :
+- la gestion des datasets
+- l’entraînement des modèles
+- les pipelines d’expérimentation
+- la gestion du cycle de vie des modèles
+- la génération des rapports
 
-- `src/` : contient le code source du projet ;
-- `data/` : contient les données utilisées ;
-- `models/` : contient les modèles entraînés et leurs artefacts ;
-- `notebooks/` : contient les expérimentations et analyses ;
-- `tests/` : contient les tests ;
-- fichiers de configuration : centralisent les paramètres du projet.
+👉 Son rôle : coordonner, pas décider
 
-Cette séparation limite les dépendances inutiles et rend l'évolution du projet plus simple.
+### 🧰 2. Toolbox (en construction)
 
----
+La toolbox contient des briques réutilisables de data science et de machine learning.
 
-### Reproductibilité
+Elle est organisée par intention métier, et non par librairie.
 
-Un projet doit pouvoir être repris par une autre personne sans dépendre uniquement des connaissances de son créateur.
+Exemple de structure :
 
-Le template inclut donc :
+toolbox/
+    preprocessing/
+        scaling.py
+        encoding.py
+        balancing.py
 
-- une gestion des dépendances ;
-- des scripts d'initialisation d'environnement ;
-- une configuration Docker ;
-- une organisation standardisée.
+    evaluation/
+        classification.py
+        regression.py
 
-L'objectif est de permettre de recréer un environnement de travail identique.
+    visualization/
+        classification.py
 
----
+Exemple d’utilisation :
 
-### Évolution du projet
+toolbox.preprocessing.balancing.smote
 
-La structure est pensée pour accompagner un projet depuis l'expérimentation jusqu'au déploiement.
+Cela signifie :
+> étape de préprocessing → problématique de déséquilibre → méthode SMOTE
 
-Exemple de cycle :
+L’objectif est une compréhension immédiate sans connaissance préalable du code.
 
-```text
-Exploration des données
-          |
-          v
-Développement du modèle
-          |
-          v
-Évaluation
-          |
-          v
-Déploiement
-```
+## 🧠 Principes de conception
 
----
+### 1. Clarté cognitive avant tout
+Si un développeur doit chercher où se trouve une fonctionnalité, la structure est à améliorer.
 
-## Structure
+### 2. Structure explicite plutôt que magie implicite
+Aucun comportement caché, aucune logique invisible dans les pipelines.
 
-```text
-project/
-│
-├── data/
-│   ├── raw/
-│   └── processed/
-│
-├── models/
-│
-├── notebooks/
-│
-├── src/
-│
-├── tests/
-│
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-├── README.md
-└── scripts d'initialisation
-```
+Tout doit être traçable et compréhensible.
 
----
+### 3. Séparation stricte des responsabilités
+- Framework = exécution et orchestration
+- Toolbox = capacités et outils
 
-## Initialisation de l'environnement
+### 4. L’expérience développeur comme métrique principale
+Un bon système n’est pas seulement performant :
 
-### Windows PowerShell
+> c’est un système où le développeur peut se concentrer sur le problème métier plutôt que sur les outils.
 
-```powershell
-./init_env.ps1
-```
+## ⚙️ Exemple de flux de travail
 
-### Windows Batch
+1. Chargement des données via DatasetManager
+2. Sélection des modèles dans TrainingManager
+3. Exécution des expérimentations via Pipeline
+4. Évaluation via ReportManager
+5. Utilisation de la toolbox pour le préprocessing et les métriques
 
-```cmd
-init_env.bat
-```
+## 🧪 Ce que ce projet n’est pas
 
-### Linux / MacOS
+- pas un AutoML boîte noire
+- pas un remplacement rigide de sklearn
+- pas un framework imposant une manière unique de faire
+- pas une abstraction opaque
 
-```bash
-./init_env.sh
-```
+## 🚀 Ce que ce projet permet
 
----
+- expérimentations ML reproductibles
+- structure claire et standardisée
+- onboarding plus rapide des développeurs
+- réutilisation simple des briques ML/DL
+- séparation nette entre orchestration et outils
 
-## Docker
+## 🧭 Motivation personnelle
 
-Construction :
+Ce projet est né d’un constat simple :
 
-```bash
-docker build -t nom_du_projet .
-```
+> les pertes de productivité les plus importantes ne viennent pas de la complexité des problèmes, mais de la friction inutile dans les systèmes qui servent à les résoudre.
 
-Exécution :
+L’objectif est donc de réduire cette friction au maximum.
 
-```bash
-docker run nom_du_projet
-```
+## 📌 État du projet
 
----
+Ce projet est une architecture évolutive centrée sur :
+- la lisibilité
+- la maintenabilité
+- la cohérence globale
+- l’expérience développeur
 
-## Utilisation recommandée
+Plus que sur la performance brute des modèles.
 
-1. Créer un projet à partir du template
-2. Initialiser l'environnement
-3. Ajouter les données et configurations nécessaires
-4. Développer dans `src/`
-5. Utiliser les notebooks pour l'exploration
-6. Transformer les expérimentations validées en modules réutilisables
-7. Déployer si nécessaire
+## 🧠 Conclusion
 
----
+> Un bon système ne se contente pas de résoudre des problèmes. Il rend les problèmes futurs plus simples à résoudre.
 
-## Objectif
+## 🚀 Quick Start
 
-Ce template fournit une base permettant de créer des projets :
+### 1. Cloner le repository
 
-- structurés ;
-- compréhensibles ;
-- maintenables ;
-- reproductibles.
+git clone <repo_url>
 
-L'objectif n'est pas seulement d'obtenir un projet fonctionnel, mais un projet capable d'évoluer dans le temps.
+### 2. Copier le contenue
 
+exemple : ml-project-template/
+    → votre_projet/
+	
+### 3. initialiser l'environnement
+
+Windows Powershell -> lancer scripts/init_env.ps1
+Windows CMD -> lancer scripts/init_env.bat
+Unix/MacOS bash  -> lancer scripts/init_env.sh
+
+### 4. Demarrer votre projet
+
+C'est prêt!!
+ 
