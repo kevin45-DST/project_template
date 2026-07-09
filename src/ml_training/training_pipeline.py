@@ -1,28 +1,17 @@
-"""
-training_pipeline.py
-
-Orchestrateur principal du framework ML.
-
-Cette classe coordonne :
-- les datasets
-- l'entraînement
-- la génération des rapports
-- la sauvegarde des modèles
-
-Elle ne contient aucune logique métier.
-"""
-
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
 
+import joblib
+import numpy as np
+from sklearn.metrics import confusion_matrix
+
+from src.utils import datetime_Utils
+
 from .dataset import Dataset
-from .model_manager import ModelManager
-from .report_manager import ReportManager
-from .training_manager import TrainingManager
-
-
+from .report_manager import ReportManager, TrainingResult
+    
 class TrainingPipeline:
     """
     Orchestrateur global du pipeline de Machine Learning.
@@ -53,29 +42,43 @@ class TrainingPipeline:
 
     def __init__(
         self,
-        datasets: list[Dataset],
-        models: dict[str, Any],
-        param_grids: dict[str, dict],
+        dataset: Dataset,
+        model: Any,
+        model_name: str,
+        params: dict[str, str],
         report_path: str | Path,
         candidate_path: str | Path,
-        scoring: str = "f1",
-        cv: int = 5,
-        top_k: int = 3,
     ) -> None:
 
-        self.datasets = datasets
-        self.top_k = top_k
-
-        self.training_manager = TrainingManager(
-            models=models,
-            param_grids=param_grids,
-            scoring=scoring,
-            cv=cv,
-        )
-
+        self.dataset = dataset
+        self.model = model
+        self.model_name = model_name
+        self.params = params
+        self.candidate_path = candidate_path
+        
         self.report_manager = ReportManager(report_path)
+        
+    def train(self) -> TrainingResult:
 
-        self.model_manager = ModelManager(candidate_path)
+        print("Début du train")
+        self.model.set_params(**self.params)
+        self.model.fit(self.dataset.x_train, self.dataset.y_train)
+        print("Fin du train")
+                
+        y_pred = self.model.predict(self.dataset.x_test)
+                
+        metrics = ReportManager.compute_metrics(self.dataset.y_test, y_pred)
+        matrix = confusion_matrix(
+                    self.dataset.y_test,
+                    y_pred,
+                ) 
+
+        return TrainingResult(
+                    model_name=self.model_name,
+                    metrics=metrics,
+                    matrix=matrix,
+                )
+
 
     def run(self) -> None:
         """
@@ -87,11 +90,17 @@ class TrainingPipeline:
         3. Sauvegarde des meilleurs modèles
         """
 
-        results = self.training_manager.train(self.datasets)
-
-        self.report_manager.generate(results)
-
-        self.model_manager.save_best(
-            results=results,
-            top_k=self.top_k,
+        result = self.train()
+        now = datetime_Utils.DateTimeUtils.now('timestamp')
+        print("Début du report")
+        self.report_manager.generate_metrics(result, np.unique(self.dataset.y_test).tolist(), now)
+        print("Fin du report")
+               
+        file_name = (
+            f"{self.model_name}_"
+            f"{now}"
+            ".joblib"
         )
+        
+        file_path = Path(self.candidate_path) / f"{file_name}"
+        joblib.dump(self.model, file_path)

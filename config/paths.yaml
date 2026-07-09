@@ -1,0 +1,10 @@
+data:
+  raw: data/raw
+  processed: data/processed
+
+models:
+  path: models
+
+reports:
+  search: reports/search
+  training: reports/training
