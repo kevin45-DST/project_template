@@ -6,6 +6,27 @@ import pandas as pd
 
 class MetricsLoader:
 
+    """
+    Chargeur des résultats d'expérimentation.
+
+    Cette classe permet de récupérer les informations persistées par les
+    composants de génération de rapports.
+
+    Elle fournit notamment :
+
+    - les métriques globales des modèles ;
+    - les matrices de confusion associées aux expériences.
+
+    Les données chargées sont destinées à être exploitées par les composants
+    de visualisation du DecisionHelper.
+
+    Cette classe ne réalise :
+
+    - aucun calcul de performance ;
+    - aucune comparaison de modèles ;
+    - aucune interprétation des résultats.
+    """
+    
     def __init__(
         self,
         report_path: Path,

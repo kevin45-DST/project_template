@@ -5,6 +5,23 @@ from pathlib import Path
 
 
 class MetricTable:
+    
+    """
+    Composant d'affichage des métriques d'expérimentation.
+
+    Cette classe présente les résultats des modèles sous forme de tableau
+    interactif.
+
+    Elle permet notamment :
+
+    - de consulter les métriques disponibles ;
+    - de sélectionner une expérimentation ;
+    - d'afficher des informations complémentaires comme la matrice
+      de confusion.
+
+    Elle ne réalise aucune comparaison automatique ni recommandation de
+    modèle.
+    """
 
     def __init__(
         self,

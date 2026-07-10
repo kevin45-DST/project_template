@@ -1,166 +1,382 @@
-# 🧠 ML Project Template — Framework & Toolbox pour une ingénierie ML lisible et durable
+# 🧠 ML Framework & Toolbox — Une ingénierie Machine Learning lisible, modulaire et durable
 
 ## 🎯 Pourquoi ce projet existe
 
-La plupart des projets de machine learning échouent rarement à cause des modèles eux-mêmes, mais à cause de leur environnement :
+Les difficultés rencontrées dans les projets Machine Learning viennent rarement uniquement des modèles.
 
-- structure de projet confuse
-- logique de préprocessing dispersée ou implicite
-- pipelines difficiles à lire et à maintenir
-- duplication de code entre expériences
-- manque de reproductibilité
-- forte friction cognitive pour les développeurs
+Les principaux problèmes apparaissent souvent autour :
 
-Après près de 20 ans d’expérience en développement logiciel et architecture technique, j’ai constaté un problème récurrent :
+* de la structure des projets ;
+* de la multiplication des expérimentations ;
+* du préprocessing dispersé ;
+* de la duplication de code ;
+* du manque de reproductibilité ;
+* de la difficulté à comparer correctement les résultats.
 
-> Les développeurs passent trop de temps à composer avec l’environnement de travail, et pas assez de temps à résoudre le problème métier.
+Après près de 20 ans d'expérience en développement logiciel et architecture technique, ce projet est né d'un constat :
 
-Ce projet est une réponse directe à ce constat.
+> Un modèle performant ne suffit pas. Il faut également un environnement qui permette de construire, comprendre et faire évoluer les expériences.
 
-## 🧭 Philosophie générale
+L'objectif de ce projet est donc de réduire la friction cognitive liée au développement Machine Learning.
 
-Ce framework repose sur une idée simple :
+---
 
-> La qualité d’un système de machine learning dépend autant de son environnement que de ses modèles.
+# 🧭 Philosophie générale
 
-Cela implique :
-- réduire la friction cognitive
-- rendre la structure prévisible
-- expliciter les responsabilités
-- séparer l’exécution des outils
-- privilégier l’ergonomie développeur plutôt que la complexité technique
+Ce framework repose sur un principe simple :
 
-## 🧱 Architecture : Framework vs Toolbox
+> La qualité d'un projet Machine Learning dépend autant de son architecture que de ses modèles.
 
-Le projet est séparé en deux couches distinctes.
+Les objectifs sont :
 
-### 🧩 1. Framework (en constuction)
+* rendre les traitements explicites ;
+* séparer clairement les responsabilités ;
+* favoriser la compréhension plutôt que l'abstraction excessive ;
+* permettre la réutilisation sans créer de boîte noire ;
+* construire progressivement une architecture cohérente.
 
-Le framework est responsable de l’exécution.
+Le framework privilégie :
 
-Il ne contient pas de logique métier ML.
+> efficacité + pédagogie
 
-Il orchestre :
-- la gestion des datasets
-- l’entraînement des modèles
-- les pipelines d’expérimentation
-- la gestion du cycle de vie des modèles
-- la génération des rapports
+Il cherche à accélérer le développement tout en conservant une compréhension complète des mécanismes.
 
-👉 Son rôle : coordonner, pas décider
+---
 
-### 🧰 2. Toolbox (en construction)
+# 🏗️ Architecture générale
 
-La toolbox contient des briques réutilisables de data science et de machine learning.
+Le projet est organisé autour de plusieurs couches complémentaires :
 
-Elle est organisée par intention métier, et non par librairie.
+Framework : orchestration des workflows
 
-Exemple de structure :
+Toolbox : capacités Data Science et Machine Learning
 
-toolbox/
+Decision Helper : analyse et visualisation des résultats
+
+MLOps : industrialisation du cycle de vie
+
+---
+
+# 🧩 Framework
+
+Le framework est responsable de l'orchestration.
+
+Il définit le déroulement des expériences sans contenir directement les méthodes Data Science.
+
+Son rôle est de coordonner :
+
+* la gestion des datasets ;
+* les pipelines d'expérimentation ;
+* l'entraînement des modèles ;
+* la génération des résultats ;
+* la préparation des artefacts.
+
+Le framework ne décide pas :
+
+* quelle méthode utiliser ;
+* quel modèle choisir ;
+* quel préprocessing appliquer.
+
+Il fournit l'environnement permettant au Data Scientist de prendre ces décisions.
+
+---
+
+# 🧰 Toolbox
+
+La toolbox contient les briques réutilisables de Data Science et Machine Learning.
+
+Elle est organisée par intention fonctionnelle et non par librairie technique.
+
+Exemple :
+
+```
+ml_toolbox/
+
     preprocessing/
-        scaling.py
-        encoding.py
-        balancing.py
+
+        scaling/
+
+        encoding/
+
+        balancing/
+
+        feature_selection/
+
 
     evaluation/
-        classification.py
-        regression.py
+
+        classification/
+
+        regression/
+
 
     visualization/
-        classification.py
 
-Exemple d’utilisation :
+        classification/
 
-toolbox.preprocessing.balancing.smote
 
-Cela signifie :
-> étape de préprocessing → problématique de déséquilibre → méthode SMOTE
+    decision_helper/
+```
 
-L’objectif est une compréhension immédiate sans connaissance préalable du code.
+L'objectif est une compréhension immédiate :
 
-## 🧠 Principes de conception
+```
+preprocessing
+    |
+    +-- balancing
+            |
+            +-- smote
+```
 
-### 1. Clarté cognitive avant tout
-Si un développeur doit chercher où se trouve une fonctionnalité, la structure est à améliorer.
+signifie :
 
-### 2. Structure explicite plutôt que magie implicite
-Aucun comportement caché, aucune logique invisible dans les pipelines.
+> appliquer une méthode de rééquilibrage des classes utilisant SMOTE.
 
-Tout doit être traçable et compréhensible.
+Chaque domaine suit une organisation homogène :
 
-### 3. Séparation stricte des responsabilités
-- Framework = exécution et orchestration
-- Toolbox = capacités et outils
+* basic
+* intermediate
+* advanced
 
-### 4. L’expérience développeur comme métrique principale
-Un bon système n’est pas seulement performant :
+---
 
-> c’est un système où le développeur peut se concentrer sur le problème métier plutôt que sur les outils.
+# 🚀 Pipelines
 
-## ⚙️ Exemple de flux de travail
+Le framework évolue autour de pipelines spécialisés.
 
-1. Chargement des données via DatasetManager
-2. Sélection des modèles dans TrainingManager
-3. Exécution des expérimentations via Pipeline
-4. Évaluation via ReportManager
-5. Utilisation de la toolbox pour le préprocessing et les métriques
+Chaque pipeline possède une responsabilité unique.
 
-## 🧪 Ce que ce projet n’est pas
+## Dataset
 
-- pas un AutoML boîte noire
-- pas un remplacement rigide de sklearn
-- pas un framework imposant une manière unique de faire
-- pas une abstraction opaque
+Le dataset constitue le sas d'entrée des données dans le framework.
 
-## 🚀 Ce que ce projet permet
+Son rôle :
 
-- expérimentations ML reproductibles
-- structure claire et standardisée
-- onboarding plus rapide des développeurs
-- réutilisation simple des briques ML/DL
-- séparation nette entre orchestration et outils
+* identifier le dataset ;
+* séparer les données train/test ;
+* fournir un format commun aux étapes suivantes.
 
-## 🧭 Motivation personnelle
+Il ne réalise aucune transformation.
 
-Ce projet est né d’un constat simple :
+Les traitements sont délégués au preprocessing.
 
-> les pertes de productivité les plus importantes ne viennent pas de la complexité des problèmes, mais de la friction inutile dans les systèmes qui servent à les résoudre.
+---
 
-L’objectif est donc de réduire cette friction au maximum.
+## PreprocessingPipeline
 
-## 📌 État du projet
+Responsable de la préparation des données.
 
-Ce projet est une architecture évolutive centrée sur :
-- la lisibilité
-- la maintenabilité
-- la cohérence globale
-- l’expérience développeur
+Il orchestre les traitements issus de la toolbox :
 
-Plus que sur la performance brute des modèles.
+* scaling ;
+* encoding ;
+* balancing ;
+* feature engineering ;
+* sélection de variables.
 
-## 🧠 Conclusion
+Son objectif est de permettre la construction dynamique des chaînes de traitement.
 
-> Un bon système ne se contente pas de résoudre des problèmes. Il rend les problèmes futurs plus simples à résoudre.
+---
 
-## 🚀 Quick Start
+## SearchPipeline
 
-### 1. Cloner le repository
+Responsable de l'exploration des modèles.
 
+Il permet :
+
+* tester plusieurs modèles ;
+* rechercher les meilleurs hyperparamètres ;
+* comparer plusieurs stratégies d'entraînement ;
+* produire des résultats exploitables.
+
+---
+
+## TrainingPipeline
+
+Responsable de l'entraînement final d'un modèle.
+
+Il réalise :
+
+* application des paramètres ;
+* entraînement ;
+* évaluation ;
+* génération des résultats ;
+* sauvegarde de l'artefact modèle.
+
+Il ne réalise pas la recherche de modèle.
+
+---
+
+# 🧠 Decision Helper
+
+Le Decision Helper est un outil d'aide à la décision destiné au Data Scientist.
+
+Son objectif :
+
+> faciliter l'analyse des résultats d'expérimentation.
+
+Il permet notamment :
+
+* visualisation des métriques ;
+* consultation des matrices de confusion ;
+* comparaison des résultats ;
+* analyse des performances modèles.
+
+Il ne :
+
+* sélectionne pas automatiquement un modèle ;
+* remplace pas MLflow ;
+* réalise pas d'entraînement.
+
+La décision finale reste celle du Data Scientist.
+
+---
+
+# 📊 Gestion des résultats
+
+Les résultats d'expérimentation sont séparés du processus d'entraînement.
+
+Les pipelines produisent des objets contenant :
+
+* paramètres utilisés ;
+* métriques ;
+* scores de validation ;
+* matrices de confusion ;
+* informations sur le modèle.
+
+Ces résultats peuvent ensuite être exploités par :
+
+* ReportManager ;
+* Decision Helper ;
+* futurs outils MLOps.
+
+---
+
+# 🧠 Principes de conception
+
+## 1. Développement orienté besoin
+
+Aucune fonctionnalité n'est ajoutée sans besoin concret.
+
+L'architecture évolue progressivement tout en conservant des principes stables.
+
+## 2. Faible couplage et forte cohésion
+
+Chaque composant possède une responsabilité claire.
+
+Une fonctionnalité appartient au composant qui possède naturellement cette responsabilité.
+
+## 3. Pas de boîte noire
+
+Le framework privilégie :
+
+* la compréhension ;
+* la transparence ;
+* la traçabilité.
+
+## 4. Simplicité avant sophistication
+
+Plusieurs composants simples sont préférés à une architecture complexe difficile à maintenir.
+
+---
+
+# 🧪 Ce que ce projet n'est pas
+
+* ❌ un AutoML boîte noire ;
+* ❌ un remplacement de scikit-learn ;
+* ❌ un framework imposant une méthode unique ;
+* ❌ une abstraction masquant les mécanismes ML.
+
+---
+
+# 🚀 Ce que ce projet permet
+
+* expérimentations ML reproductibles ;
+* structure claire et standardisée ;
+* réduction de la duplication ;
+* meilleure collaboration ;
+* réutilisation simple des briques ML ;
+* séparation nette entre outils et orchestration.
+
+---
+
+# 📌 État du projet
+
+Ce projet est actuellement en construction.
+
+Les fondations principales sont :
+
+✅ architecture modulaire
+✅ toolbox organisée par domaines
+✅ pipelines spécialisés
+✅ génération de rapports
+✅ Decision Helper
+✅ gestion des résultats d'expérimentation
+
+Les prochaines évolutions concernent notamment :
+
+* enrichissement du preprocessing ;
+* amélioration de l'aide à la décision ;
+* intégration MLOps ;
+* déploiement et monitoring.
+
+---
+
+# 🚀 Quick Start
+
+## 1. Cloner le repository
+
+```bash
 git clone <repo_url>
+```
 
-### 2. Copier le contenue
+## 2. Copier le template
 
-exemple : ml-project-template/
-    → votre_projet/
-	
-### 3. initialiser l'environnement
+Exemple :
 
-Windows Powershell -> lancer scripts/init_env.ps1
-Windows CMD -> lancer scripts/init_env.bat
-Unix/MacOS bash  -> lancer scripts/init_env.sh
+```
+ml-framework-template/
 
-### 4. Demarrer votre projet
+        →
 
-C'est prêt!!
- 
+votre_projet/
+```
+
+## 3. Initialiser l'environnement
+
+Windows PowerShell :
+
+```
+scripts/init_env.ps1
+```
+
+Windows CMD :
+
+```
+scripts/init_env.bat
+```
+
+Unix / MacOS :
+
+```
+scripts/init_env.sh
+```
+
+## 4. Démarrer le projet
+
+L'environnement est prêt.
+
+Vous pouvez commencer à développer votre projet Machine Learning.
+
+---
+
+# 🧠 Conclusion
+
+> Un bon framework ne cherche pas à remplacer l'expertise humaine. Il cherche à permettre aux experts de se concentrer sur les problèmes qui comptent.
+
+L'objectif de ce projet est de construire progressivement un environnement Machine Learning :
+
+* compréhensible ;
+* évolutif ;
+* réutilisable ;
+* durable.

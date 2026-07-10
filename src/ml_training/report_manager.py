@@ -15,24 +15,52 @@ from sklearn.metrics import (
 @dataclass(slots=True)
 class SearchTrainingResult:
     """
-    Résultat d'un entraînement de modèle lors de la recherche du meilleur modèle.
+    Conteneur des résultats d'une recherche de modèle.
+
+    Cette classe stocke les informations produites lors d'une phase de
+    recherche d'hyperparamètres.
+
+    Les données stockées permettent l'analyse et la comparaison des modèles
+    via des outils d'aide à la décision (DecisionHelper).
+
+    Ce composant ne réalise pas :
+    
+    - la sélection finale du modèle ;
+    - l'interprétation des résultats ;
+    - le déploiement du modèle.
 
     Attributes
     ----------
     dataset_name : str
+        Nom du dataset utilisé pour l'entraînement.
+
     model_name : str
+        Nom du modèle évalué.
+
     best_params : dict
-    best_score : float
+        Hyperparamètres ayant obtenu le meilleur résultat pendant la recherche.
+
+    cv_score : float
+        Score obtenu par validation croisée avec le critère d'évaluation utilisé
+        lors de la recherche.
+
     metrics : dict
-    matrix: Any
+        Métriques calculées sur le jeu de test.
+
+    matrix : Any
+        Matrice de confusion associée aux prédictions du meilleur estimateur.
+
     best_estimator : Any
-    scoring: str
+        Instance du modèle entraîné avec les meilleurs paramètres trouvés.
+
+    scoring : str
+        Critère d'évaluation utilisé pendant la recherche.
     """
 
     dataset_name: str
     model_name: str
     best_params: dict
-    best_score: float
+    cv_score: float
     metrics: dict
     matrix: Any
     best_estimator: Any
@@ -41,13 +69,22 @@ class SearchTrainingResult:
 @dataclass(slots=True)
 class TrainingResult:
     """
-    Résultat d'un entraînement de modèle.
+    Conteneur des résultats d'entraînement d'un modèle.
+
+    Cette classe représente le résultat d'un entraînement final ou isolé.
+    Elle contient les informations nécessaires pour générer des rapports
+    d'évaluation et alimenter les outils d'analyse.
 
     Attributes
     ----------
     model_name : str
+        Nom du modèle entraîné.
+
     metrics : dict
-    matrix: Any
+        Ensemble des métriques calculées sur le jeu de test.
+
+    matrix : Any
+        Matrice de confusion obtenue lors de l'évaluation du modèle.
     """
     
     model_name : str
@@ -56,25 +93,27 @@ class TrainingResult:
 
 class ReportManager:
     """
-    Générateur de rapports d'entraînement.
+    Gestionnaire de génération des rapports d'évaluation.
 
-    Cette classe transforme les résultats d'entraînement en fichier CSV.
+    Cette classe transforme les résultats d'entraînement en fichiers
+    exploitables par les outils d'analyse du framework.
 
     Responsabilités
     ----------------
-    - conversion des résultats en DataFrame
-    - export CSV
-    - structuration des performances
+    - structurer les résultats d'entraînement ;
+    - exporter les métriques au format CSV ;
+    - sauvegarder les matrices de confusion ;
+    - fournir une représentation persistante des performances modèles.
 
-    Elle ne gère PAS :
-    - l'entraînement
-    - la sélection de modèles
-    - la sauvegarde de modèles
+    Cette classe ne gère pas :
 
-    Comment utiliser
-    ----------------
-    >>> reporter = ReportManager("reports")
-    >>> reporter.generate(results)
+    - l'entraînement des modèles ;
+    - la recherche d'hyperparamètres ;
+    - la comparaison ou la sélection du modèle final ;
+    - le suivi MLOps.
+
+    L'analyse des résultats et l'aide à la décision sont réalisées par
+    les composants dédiés comme DecisionHelper.
     """
 
     def __init__(self, output_path: str | Path) -> None:
@@ -86,16 +125,35 @@ class ReportManager:
                          labels: list[str],
                          training_date: str | None) -> Path:
         """
-        Génère un rapport CSV.
+        Génère un rapport contenant les résultats d'évaluation des modèles.
+
+        Le contenu du rapport dépend du type de résultat fourni :
+
+        - TrainingResult :
+            Génération d'un rapport pour un modèle entraîné.
+
+        - SearchTrainingResult :
+            Génération d'un rapport comparatif contenant les résultats de
+            recherche d'hyperparamètres pour plusieurs modèles.
+
+        Les métriques générées sont destinées à être consultées par des outils
+        d'analyse et d'aide à la décision.
 
         Parameters
         ----------
-        results : List[TrainingResult]
+        results : TrainingResult | list[SearchTrainingResult]
+            Résultat(s) d'entraînement à exporter.
+
+        labels : list[str]
+            Classes utilisées pour annoter les matrices de confusion.
+
+        training_date : str | None
+            Identifiant temporel utilisé pour nommer les fichiers générés.
 
         Returns
         -------
         Path
-            Chemin du fichier généré.
+            Chemin du répertoire contenant le rapport généré.
         """
 
         rows = []
@@ -112,7 +170,7 @@ class ReportManager:
                         "label": f"{r.model_name}_{r.scoring}", 
                         "model": r.model_name,
                         "scoring": r.scoring,
-                        "best_score": r.best_score,
+                        "cv_score": r.cv_score,
                         "accuracy": r.metrics["accuracy"],
                         "precision": r.metrics["precision"],
                         "recall": r.metrics["recall"],
@@ -155,23 +213,32 @@ class ReportManager:
         training_date: str | None
     ) -> Path:
         """
-        Sauvegarde une matrice de confusion associée à un modèle.
+        Sauvegarde une matrice de confusion au format JSON.
+
+        La matrice sauvegardée permet une visualisation ultérieure dans les
+        outils d'analyse du framework.
 
         Parameters
         ----------
         label : str
-            Identifiant unique du modèle ou de l'expérience.
+            Identifiant associé au modèle ou à l'expérience.
 
-        y_true : array-like
-            Valeurs réelles.
+        classes : list[str]
+            Liste des classes du problème de classification.
 
-        y_pred : array-like
-            Prédictions du modèle.
+        matrix : Any
+            Matrice de confusion calculée lors de l'évaluation.
+
+        directory : str
+            Sous-répertoire de stockage.
+
+        training_date : str | None
+            Date ou identifiant temporel utilisé dans le nom du fichier.
 
         Returns
         -------
         Path
-            Chemin du fichier généré.
+            Chemin du fichier JSON généré.
         """
 
         data = {
@@ -212,20 +279,29 @@ class ReportManager:
         y_pred,
     ) -> dict:
         """
-        Calcule les principales métriques de classification.
+        Calcule les métriques d'évaluation d'un modèle de classification.
+
+        Les métriques calculées permettent d'analyser les performances d'un
+        modèle après entraînement.
 
         Parameters
         ----------
         y_true : array-like
-            Labels réels.
+            Valeurs réelles du jeu de test.
 
         y_pred : array-like
-            Labels prédits.
+            Valeurs prédites par le modèle.
 
         Returns
         -------
         dict
-            Dictionnaire contenant les métriques.
+            Dictionnaire contenant les métriques calculées :
+            
+            - accuracy ;
+            - precision ;
+            - recall ;
+            - f1 ;
+            - f1_macro.
         """
 
         return {

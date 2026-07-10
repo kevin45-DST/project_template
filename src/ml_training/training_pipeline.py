@@ -9,32 +9,60 @@ from sklearn.metrics import confusion_matrix
 
 from src.utils import datetime_Utils
 
-from .dataset import Dataset
+from ..ml_toolbox.dataset.dataset import Dataset
 from .report_manager import ReportManager, TrainingResult
     
 class TrainingPipeline:
     """
-    Orchestrateur global du pipeline de Machine Learning.
+    Pipeline responsable de l'entraînement et de l'évaluation d'un modèle.
 
-    Cette classe est le point d'entrée principal du framework.
+    Cette classe orchestre les différentes étapes nécessaires à la création
+    d'un modèle candidat :
 
-    Elle ne fait qu'orchestrer les composants spécialisés :
+    1. Application des hyperparamètres au modèle fourni.
+    2. Entraînement du modèle sur le dataset d'apprentissage.
+    3. Évaluation du modèle sur le dataset de test.
+    4. Génération d'un rapport contenant les métriques et la matrice de confusion.
+    5. Sauvegarde du modèle entraîné au format joblib.
 
-    1. TrainingManager → entraînement des modèles
-    2. ReportManager → génération du CSV
-    3. ModelManager → sauvegarde des meilleurs modèles
+    Le pipeline ne gère pas directement :
+    
+    - la préparation des données ;
+    - la recherche d'hyperparamètres ;
+    - la sélection du meilleur modèle parmi plusieurs candidats ;
+    - le suivi MLOps.
 
-    Comment utiliser
-    ----------------
+    Ces responsabilités sont laissées aux composants spécialisés du framework.
+
+    Parameters
+    ----------
+    dataset : Dataset
+        Dataset contenant les jeux de données d'entraînement et de test.
+
+    model : Any
+        Modèle compatible avec l'API scikit-learn (`fit`, `predict`, `set_params`).
+
+    model_name : str
+        Nom utilisé pour identifier le modèle dans les rapports et les artefacts.
+
+    params : dict[str, Any]
+        Paramètres d'entraînement appliqués au modèle avant le fit.
+
+    report_path : str | Path
+        Répertoire dans lequel les rapports d'évaluation seront générés.
+
+    candidate_path : str | Path
+        Répertoire de sauvegarde des modèles entraînés.
+
+    Examples
+    --------
     >>> pipeline = TrainingPipeline(
-    ...     datasets=datasets,
-    ...     models=models,
-    ...     param_grids=param_grids,
+    ...     dataset=dataset,
+    ...     model=RandomForestClassifier(),
+    ...     model_name="random_forest",
+    ...     params={"n_estimators": 100},
     ...     report_path="reports",
     ...     candidate_path="models/candidates",
-    ...     scoring="f1",
-    ...     cv=5,
-    ...     top_k=3,
     ... )
     ...
     >>> pipeline.run()
@@ -45,7 +73,7 @@ class TrainingPipeline:
         dataset: Dataset,
         model: Any,
         model_name: str,
-        params: dict[str, str],
+        params: dict[str, Any],
         report_path: str | Path,
         candidate_path: str | Path,
     ) -> None:
@@ -60,10 +88,27 @@ class TrainingPipeline:
         
     def train(self) -> TrainingResult:
 
-        print("Début du train")
+        """
+        Entraîne le modèle et calcule ses résultats d'évaluation.
+
+        Cette méthode applique les paramètres configurés au modèle,
+        réalise l'entraînement sur le jeu de données d'apprentissage,
+        puis évalue les performances sur le jeu de test.
+
+        Les éléments retournés sont :
+
+        - le nom du modèle ;
+        - les métriques calculées ;
+        - la matrice de confusion.
+
+        Returns
+        -------
+        TrainingResult
+            Objet contenant les résultats d'évaluation du modèle entraîné.
+        """
+        
         self.model.set_params(**self.params)
         self.model.fit(self.dataset.x_train, self.dataset.y_train)
-        print("Fin du train")
                 
         y_pred = self.model.predict(self.dataset.x_test)
                 
@@ -82,19 +127,23 @@ class TrainingPipeline:
 
     def run(self) -> None:
         """
-        Exécute le pipeline complet.
+        Exécute le cycle complet d'entraînement d'un modèle candidat.
 
-        Étapes :
-        1. Entraînement des modèles
-        2. Génération du rapport CSV
-        3. Sauvegarde des meilleurs modèles
+        Étapes réalisées :
+
+        1. Entraînement du modèle.
+        2. Calcul des métriques et de la matrice de confusion.
+        3. Génération du rapport d'évaluation.
+        4. Sauvegarde du modèle entraîné au format joblib.
+
+        Le modèle sauvegardé correspond à un candidat entraîné.
+        La sélection finale parmi plusieurs modèles relève d'un composant
+        supérieur (par exemple un futur Decision Helper).
         """
 
         result = self.train()
         now = datetime_Utils.DateTimeUtils.now('timestamp')
-        print("Début du report")
         self.report_manager.generate_metrics(result, np.unique(self.dataset.y_test).tolist(), now)
-        print("Fin du report")
                
         file_name = (
             f"{self.model_name}_"

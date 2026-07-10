@@ -26,8 +26,11 @@ class BasicScaling:
 
     @staticmethod
     def standard(
-        X: Any,
-    ) -> tuple[Any, StandardScaler]:
+        X_train: Any,
+        X_test: Any,
+        y_train: Any,
+        y_test: Any,
+    ) -> tuple[Any, Any, Any, Any, StandardScaler]:
         """
         Standardisation des données.
 
@@ -54,15 +57,21 @@ class BasicScaling:
         scaler = StandardScaler()
 
         return (
-            scaler.fit_transform(X),
+            scaler.fit_transform(X_train),
+            scaler.transform(X_test),
+            y_train,
+            y_test,
             scaler,
         )
 
     @staticmethod
     def min_max(
-        X: Any,
+        X_train: Any,
+        X_test: Any,
+        y_train: Any,
+        y_test: Any,
         feature_range: tuple[int, int] = (0, 1),
-    ) -> tuple[Any, MinMaxScaler]:
+    ) -> tuple[Any, Any, Any, Any, MinMaxScaler]:
         """
         Normalisation Min-Max.
 
@@ -87,14 +96,20 @@ class BasicScaling:
         )
 
         return (
-            scaler.fit_transform(X),
+            scaler.fit_transform(X_train),
+            scaler.transform(X_test),
+            y_train,
+            y_test,
             scaler,
         )
 
     @staticmethod
     def robust(
-        X: Any,
-    ) -> tuple[Any, RobustScaler]:
+        X_train: Any,
+        X_test: Any,
+        y_train: Any,
+        y_test: Any,
+    ) -> tuple[Any, Any, Any, Any, RobustScaler]:
         """
         Standardisation robuste.
 
@@ -114,15 +129,22 @@ class BasicScaling:
 
         scaler = RobustScaler()
 
+
         return (
-            scaler.fit_transform(X),
+            scaler.fit_transform(X_train),
+            scaler.transform(X_test),
+            y_train,
+            y_test,
             scaler,
         )
 
     @staticmethod
     def max_abs(
-        X: Any,
-    ) -> tuple[Any, MaxAbsScaler]:
+        X_train: Any,
+        X_test: Any,
+        y_train: Any,
+        y_test: Any,
+    ) -> tuple[Any, Any, Any, Any, MaxAbsScaler]:
         """
         Mise à l'échelle par valeur absolue maximale.
 
@@ -144,14 +166,20 @@ class BasicScaling:
         scaler = MaxAbsScaler()
 
         return (
-            scaler.fit_transform(X),
+            scaler.fit_transform(X_train),
+            scaler.transform(X_test),
+            y_train,
+            y_test,
             scaler,
         )
 
     @staticmethod
     def l2_normalization(
-        X: Any,
-    ) -> tuple[Any, Normalizer]:
+        X_train: Any,
+        X_test: Any,
+        y_train: Any,
+        y_test: Any,
+    ) -> tuple[Any, Any, Any, Any, Normalizer]:
         """
         Normalisation L2.
 
@@ -176,14 +204,20 @@ class BasicScaling:
         )
 
         return (
-            scaler.fit_transform(X),
+            scaler.fit_transform(X_train),
+            scaler.transform(X_test),
+            y_train,
+            y_test,
             scaler,
         )
 
     @staticmethod
     def l1_normalization(
-        X: Any,
-    ) -> tuple[Any, Normalizer]:
+        X_train: Any,
+        X_test: Any,
+        y_train: Any,
+        y_test: Any,
+    ) -> tuple[Any, Any, Any, Any, Normalizer]:
         """
         Normalisation L1.
 
@@ -205,6 +239,9 @@ class BasicScaling:
         )
 
         return (
-            scaler.fit_transform(X),
+            scaler.fit_transform(X_train),
+            scaler.transform(X_test),
+            y_train,
+            y_test,
             scaler,
         )

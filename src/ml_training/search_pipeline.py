@@ -10,32 +10,76 @@ from tqdm import tqdm
 
 from src.utils import datetime_Utils
 
-from .dataset import Dataset
+from ..ml_toolbox.dataset.dataset import Dataset
 from .report_manager import ReportManager, SearchTrainingResult
     
 class SearchPipeline:
     """
-    Orchestrateur global du pipeline de Machine Learning.
+    Pipeline de recherche et comparaison de modèles.
 
-    Cette classe est le point d'entrée principal du framework.
+    Cette classe orchestre l'exploration de plusieurs candidats modèles
+    en utilisant une recherche d'hyperparamètres basée sur GridSearchCV.
 
-    Elle ne fait qu'orchestrer les composants spécialisés :
+    Pour chaque modèle fourni, le pipeline :
 
-    1. TrainingManager → entraînement des modèles
-    2. ReportManager → génération du CSV
-    3. ModelManager → sauvegarde des meilleurs modèles
+    1. Récupère la grille d'hyperparamètres associée.
+    2. Lance une recherche avec validation croisée selon un ou plusieurs
+       critères d'évaluation.
+    3. Sélectionne le meilleur estimateur trouvé.
+    4. Évalue ce modèle sur le jeu de test.
+    5. Stocke les résultats de comparaison dans un objet SearchTrainingResult.
 
-    Comment utiliser
-    ----------------
-    >>> pipeline = TrainingPipeline(
-    ...     datasets=datasets,
-    ...     models=models,
-    ...     param_grids=param_grids,
+    Le pipeline est responsable de la phase de recherche et d'évaluation
+    comparative. Il ne gère pas :
+
+    - la préparation des données ;
+    - l'entraînement final d'un modèle sélectionné ;
+    - le déploiement ;
+    - le suivi MLOps.
+
+    La sélection finale d'un modèle parmi les résultats peut être réalisée
+    par un composant dédié (Decision Helper displonible dans la toolbox).
+
+    Parameters
+    ----------
+    dataset : Dataset
+        Dataset contenant les données d'entraînement et de test.
+
+    models : dict[str, Any]
+        Dictionnaire associant un nom de modèle à une instance
+        compatible avec l'API scikit-learn.
+
+    param_grids : dict[str, dict]
+        Dictionnaire contenant les grilles d'hyperparamètres associées
+        à chaque modèle.
+
+    report_path : str | Path
+        Répertoire dans lequel les rapports de recherche seront générés.
+
+    scorings : str | list[str]
+        Critères d'évaluation utilisés par GridSearchCV.
+
+    cv : int, optional
+        Nombre de folds utilisés pour la validation croisée, par défaut 5.
+
+    n_jobs : int, optional
+        Nombre de jobs parallèles utilisés par GridSearchCV,
+        par défaut -1.
+
+    Examples
+    --------
+    >>> pipeline = SearchPipeline(
+    ...     dataset=dataset,
+    ...     models={
+    ...         "random_forest": RandomForestClassifier()
+    ...     },
+    ...     param_grids={
+    ...         "random_forest": {
+    ...             "n_estimators": [100, 200]
+    ...         }
+    ...     },
     ...     report_path="reports",
-    ...     candidate_path="models/candidates",
-    ...     scoring="f1",
-    ...     cv=5,
-    ...     top_k=3,
+    ...     scorings=["f1", "accuracy"],
     ... )
     ...
     >>> pipeline.run()
@@ -66,7 +110,23 @@ class SearchPipeline:
         
         
     def train_with_gridsearch(self) -> list[SearchTrainingResult]:
+        """
+        Recherche les meilleurs paramètres pour chaque modèle configuré.
 
+        Pour chaque combinaison modèle / métrique d'évaluation :
+
+        1. Exécute une recherche GridSearchCV.
+        2. Entraîne les différents candidats avec validation croisée.
+        3. Récupère le meilleur estimateur obtenu.
+        4. Évalue ce modèle sur le jeu de test.
+        5. Retourne les résultats détaillés de comparaison.
+
+        Returns
+        -------
+        list[SearchTrainingResult]
+            Liste contenant les résultats de recherche pour chaque couple
+            modèle / critère d'évaluation.
+        """
         results: list[SearchTrainingResult] = []
 
         for model_name, model in tqdm(
@@ -91,9 +151,7 @@ class SearchPipeline:
                     verbose=1
                 )
 
-                print("Début du train")
                 search.fit(self.dataset.x_train, self.dataset.y_train)
-                print("Fin du train")
                 
                 y_pred = search.best_estimator_.predict(self.dataset.x_test)
                 
@@ -108,7 +166,7 @@ class SearchPipeline:
                         dataset_name=self.dataset.name,
                         model_name=model_name,
                         best_params=search.best_params_,
-                        best_score=search.best_score_,
+                        cv_score=search.best_score_,
                         metrics=metrics,
                         matrix=matrix,
                         best_estimator=search.best_estimator_,
@@ -121,12 +179,17 @@ class SearchPipeline:
 
     def run(self) -> None:
         """
-        Exécute le pipeline complet.
+        Exécute le pipeline complet de recherche de modèles.
 
-        Étapes :
-        1. Entraînement des modèles
-        2. Génération du rapport CSV
-        3. Sauvegarde des meilleurs modèles
+        Étapes réalisées :
+
+        1. Recherche des meilleurs hyperparamètres avec GridSearchCV.
+        2. Évaluation des meilleurs estimateurs sur le jeu de test.
+        3. Génération du rapport de comparaison des résultats.
+
+        Le pipeline produit uniquement des résultats de recherche.
+        L'entraînement final d'un modèle retenu relève d'un pipeline
+        d'entraînement dédié.
         """
 
         results = self.train_with_gridsearch()

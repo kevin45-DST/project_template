@@ -13,6 +13,22 @@ from loaders.metrics_loader import MetricsLoader
 
 class MetricsView:
 
+    """
+    Vue principale d'affichage des métriques du DecisionHelper.
+
+    Cette classe gère la présentation des résultats disponibles au Data
+    Scientist.
+
+    Elle permet :
+
+    - l'affichage du tableau des métriques ;
+    - la gestion des interactions utilisateur ;
+    - l'ouverture des visualisations complémentaires.
+
+    Les données affichées proviennent des rapports générés par les pipelines.
+    La vue ne réalise aucune analyse métier des performances.
+    """
+    
     def __init__(
         self,
         metrics: pd.DataFrame,
