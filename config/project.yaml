@@ -1,0 +1,5 @@
+mlflow:
+  experiment_name: credit_card_fraud_detection
+  backend:
+    type: sqlite
+    name: mlflow.db
