@@ -1,3 +1,6 @@
+# Copyright © 2026 Kévin DELANOUE
+# License: see LICENSE
+
 import json
 from pathlib import Path
 
@@ -33,6 +36,20 @@ class MetricsLoader:
     ) -> None:
 
         self.report_path = report_path
+        
+    def list_runs(self) -> list[str]:
+        """
+        Retourne la liste des runs disponibles.
+
+        Chaque sous-répertoire du répertoire de recherche correspond
+        à un run.
+        """
+
+        return sorted(
+            path.name
+            for path in self.report_path.iterdir()
+            if path.is_dir()
+        )
 
     def load(self) -> pd.DataFrame:
 
@@ -50,7 +67,7 @@ class MetricsLoader:
             / "confusion_matrix"
             / f"{run_id}_confusion_matrix.json"
         )
-
+        print(f"{run_id = }")
         with open(
             file_path,
             encoding="utf-8",

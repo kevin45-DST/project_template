@@ -1,3 +1,9 @@
+# Copyright © 2026 Kévin DELANOUE
+# License: see LICENSE
+
+from ml_toolbox.transversal.reporting.report_manager import ReportManager
+
+
 class RunFailureRecovery:
     """
     Gestion de la récupération des runs en échec.

@@ -1,4 +1,6 @@
-from pathlib import Path
+# Copyright © 2026 Kévin DELANOUE
+# License: see LICENSE
+
 from typing import Any
 
 from config.config_manager import ConfigManager
@@ -51,13 +53,13 @@ class TrackingManager:
             f"{backend_name}.class"
         )
 
-        backend_class = ImportsUtils.get_class(
+        backend_implementation_class = ImportsUtils.get_class(
             backend_module,
             backend_class_name,
         )
         
         return cls(
-            backend_class()
+            backend_implementation_class()
         )
 
 

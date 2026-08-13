@@ -1,3 +1,6 @@
+# Copyright © 2026 Kévin DELANOUE
+# License: see LICENSE
+
 from abc import ABC, abstractmethod
 from typing import Any
 

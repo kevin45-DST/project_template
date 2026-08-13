@@ -1,19 +1,21 @@
+# Copyright © 2026 Kévin DELANOUE
+# License: see LICENSE
+
 from __future__ import annotations
 
-from pathlib import Path
 import time
-from typing import Any
 
-import joblib
 import numpy as np
-from sklearn.metrics import confusion_matrix
 
 from config.config_manager import ConfigManager
-from src.utils import datetime_Utils
+from src.ml_toolbox.transversal.evaluation.evaluation_manager import EvaluationManager
+from src.ml_toolbox.data_science.training.training_manager import TrainingManager
+
+from src.ml_toolbox.transversal.persistence.model_persistence_manager import ModelPersistenceManager
 from src.utils.ids_utils import runId
 
-from ..ml_toolbox.data.dataset.dataset import Dataset
-from ..ml_toolbox.reporting.report_manager import ReportManager, TrainingResult
+from ..ml_toolbox.data_science.data.dataset.dataset import Dataset
+from ..ml_toolbox.transversal.reporting.report_manager import ReportManager, TrainingResult
     
 class TrainingPipeline:
     """
@@ -74,64 +76,29 @@ class TrainingPipeline:
     def __init__(
         self,
         dataset: Dataset,
-        model: Any,
-        model_name: str,
-        params: dict[str, Any]
     ) -> None:
-
-        self.dataset = dataset
-        self.model = model
-        self.model_name = model_name
-        self.params = params
         
-        config = ConfigManager(
-            "config/paths.yaml"
-        )
-
-        self.candidate_path = Path(config.get("project.root_folder")) / config.get("models.root_folder")
+        project_config = ConfigManager(
+            "config/project.yaml"
+        ) 
+        
+        self.dataset = dataset
+        
+        self.model_name = project_config.get("model.name")
+        
         self.run_id = runId.create()
+
+        self.training_manager = TrainingManager.create(
+            model_name=self.model_name,
+            dataset=self.dataset,
+        )
         
         self.report_manager = ReportManager(run_id = self.run_id, mode="training")
         
-    def train(self) -> TrainingResult:
-
-        """
-        Entraîne le modèle et calcule ses résultats d'évaluation.
-
-        Cette méthode applique les paramètres configurés au modèle,
-        réalise l'entraînement sur le jeu de données d'apprentissage,
-        puis évalue les performances sur le jeu de test.
-
-        Les éléments retournés sont :
-
-        - le nom du modèle ;
-        - les métriques calculées ;
-        - la matrice de confusion.
-
-        Returns
-        -------
-        TrainingResult
-            Objet contenant les résultats d'évaluation du modèle entraîné.
-        """
+        self.persistence_manager = ModelPersistenceManager.create()
         
-        self.model.set_params(**self.params)
-        self.model.fit(self.dataset.x_train, self.dataset.y_train)
-                
-        y_pred = self.model.predict(self.dataset.x_test)
-                
-        metrics = ReportManager.compute_metrics(self.dataset.y_test, y_pred)
-        matrix = confusion_matrix(
-                    self.dataset.y_test,
-                    y_pred,
-                ) 
-
-        return TrainingResult(
-                    model_name=self.model_name,
-                    metrics=metrics,
-                    matrix=matrix,
-                )
-
-
+        self.evaluation_manager = None
+        
     def run(self) -> None:
         """
         Exécute le cycle complet d'entraînement d'un modèle candidat.
@@ -150,22 +117,20 @@ class TrainingPipeline:
 
         # Top démarrage entrainement
         start_time = time.perf_counter()
-        result = self.train()
+        self.training_manager.train()
         # top fin d'entrainement
         end_time = time.perf_counter()
         # calcul de la durée d'entrainement
-        duration = end_time - start_time
-        
-        now = datetime_Utils.DateTimeUtils.now('timestamp')
-        self.report_manager.generate_metrics(result, np.unique(self.dataset.y_test).tolist(), duration)
+        training_duration = end_time - start_time
                
-        file_name = (
-            f"{self.model_name}_"
-            f"{now}"
-            ".joblib"
-        )
-        file_path = Path(self.candidate_path) / self.run_id
-        file_path.mkdir(parents=True, exist_ok=True)
-        file_name_path =  file_path / f"{file_name}"
-
-        joblib.dump(self.model, file_name_path)
+        self.evaluation_manager = EvaluationManager.create(self.training_manager.model, self.model_name, self.dataset)
+        
+        evaluation = self.evaluation_manager.evaluate()
+        
+        result = TrainingResult(self.model_name, evaluation["metrics"], evaluation["matrix"])
+        
+        self.report_manager.generate_metrics(result, np.unique(self.dataset.y_test).tolist(), training_duration)
+        
+        model_id = (f"{self.model_name}_{self.run_id}")
+        
+        self.persistence_manager.save(self.training_manager.model, model_id)

@@ -1,14 +1,17 @@
+# Copyright © 2026 Kévin DELANOUE
+# License: see LICENSE
+
 from pathlib import Path
 
 import streamlit as st
 import pandas as pd
 
-from widgets.confusion_matrix import ConfusionMatrix
-from widgets.metric_table import MetricTable
+from src.ml_toolbox.helpers.decision_helper.widgets.confusion_matrix import ConfusionMatrix
+from src.ml_toolbox.helpers.decision_helper.widgets.metric_table import MetricTable
 
 import sys
 sys.path.append(str(Path(__file__).resolve().parent))
-from loaders.metrics_loader import MetricsLoader
+from src.ml_toolbox.helpers.decision_helper.loaders.metrics_loader import MetricsLoader
 
 
 class MetricsView:
@@ -33,14 +36,18 @@ class MetricsView:
         self,
         metrics: pd.DataFrame,
         report_path: Path,
+        run_id: str,
     ) -> None:
 
         self.metrics = metrics
         self.report_path = report_path
+        self.run_id = run_id
 
     def show(self):
 
         st.title("Decision Helper")
+        
+        st.subheader(f"Run : {self.run_id}")
 
         MetricTable(
             self.metrics,
@@ -57,30 +64,31 @@ class MetricsView:
 
         if selected_view is None:
             return
+        
+        model_label = st.session_state.get(
+            "selected_model"
+        )
+
+        if model_label is None:
+            return
 
         run_id = st.session_state.get(
             "selected_run"
         )
-        
-        if (
-            selected_view is None
-            or run_id is None
-        ):
-            return
 
         loader = MetricsLoader(
             self.report_path
         )
 
         if selected_view == "confusion":
-
+            
             matrix = loader.load_confusion_matrix(
-                run_id
+                model_label
             )
 
             ConfusionMatrix.show(
                 matrix,
-                run_id
+                model_label,
             )
 
         st.session_state["selected_view"] = None

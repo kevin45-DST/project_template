@@ -1,4 +1,6 @@
-from dataclasses import dataclass
+# Copyright © 2026 Kévin DELANOUE
+# License: see LICENSE
+
 import importlib
 
 class ImportsUtils:

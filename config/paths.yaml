@@ -6,7 +6,7 @@ data:
   raw: raw
   processed: processed
 
-models:
+persistence:
   root_folder: models
 
 reports:

@@ -1,0 +1,3 @@
+sklearn:
+  module: src.ml_toolbox.data_science.training.implementations.scikit_learn_backend
+  class: SklearnTrainingBackend

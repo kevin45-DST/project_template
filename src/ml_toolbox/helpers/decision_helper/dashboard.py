@@ -1,8 +1,12 @@
+# Copyright © 2026 Kévin DELANOUE
+# License: see LICENSE
+
 from pathlib import Path
+import streamlit as st
 
-from loaders.metrics_loader import MetricsLoader
+from src.ml_toolbox.helpers.decision_helper.loaders.metrics_loader import MetricsLoader
 
-from views.metrics_view import MetricsView
+from src.ml_toolbox.helpers.decision_helper.views.metrics_view import MetricsView
 
 
 class Dashboard:
@@ -31,12 +35,28 @@ class Dashboard:
         self.report_path = report_path
 
     def run(self) -> None:
+        
+        runs = MetricsLoader(
+            self.report_path
+        ).list_runs()
+
+        if not runs:
+            st.warning("Aucun run disponible.")
+            return
+
+        selected_run = st.sidebar.radio(
+            "Runs",
+            runs,
+        )
+
+        run_path = self.report_path / selected_run
 
         metrics = MetricsLoader(
-            self.report_path
+            run_path
         ).load()
 
         MetricsView(
             metrics,
-            self.report_path,
+            run_path,
+            selected_run,
         ).show()

@@ -1,3 +1,6 @@
+# Copyright © 2026 Kévin DELANOUE
+# License: see LICENSE
+
 import streamlit as st
 import pandas as pd
 
@@ -53,5 +56,5 @@ class MetricTable:
                     key=f"cm_{row['label']}",
                 ):
 
-                    st.session_state["selected_run"] = row["label"]
+                    st.session_state["selected_model"] = row["label"]
                     st.session_state["selected_view"] = "confusion"

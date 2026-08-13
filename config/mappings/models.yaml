@@ -1,0 +1,185 @@
+models:
+
+  # ==================================================
+  # Scikit-learn - Classification
+  # ==================================================
+
+  logistic_regression:
+    backend: sklearn
+    module: sklearn.linear_model
+    class: LogisticRegression
+
+  decision_tree_classifier:
+    backend: sklearn
+    module: sklearn.tree
+    class: DecisionTreeClassifier
+
+  random_forest_classifier:
+    backend: sklearn
+    module: sklearn.ensemble
+    class: RandomForestClassifier
+
+  extra_trees_classifier:
+    backend: sklearn
+    module: sklearn.ensemble
+    class: ExtraTreesClassifier
+
+  gradient_boosting_classifier:
+    backend: sklearn
+    module: sklearn.ensemble
+    class: GradientBoostingClassifier
+
+  hist_gradient_boosting_classifier:
+    backend: sklearn
+    module: sklearn.ensemble
+    class: HistGradientBoostingClassifier
+
+  svm_classifier:
+    backend: sklearn
+    module: sklearn.svm
+    class: SVC
+
+  knn_classifier:
+    backend: sklearn
+    module: sklearn.neighbors
+    class: KNeighborsClassifier
+
+
+  # ==================================================
+  # Scikit-learn - Regression
+  # ==================================================
+
+  linear_regression:
+    backend: sklearn
+    module: sklearn.linear_model
+    class: LinearRegression
+
+  ridge_regression:
+    backend: sklearn
+    module: sklearn.linear_model
+    class: Ridge
+
+  lasso_regression:
+    backend: sklearn
+    module: sklearn.linear_model
+    class: Lasso
+
+  elastic_net:
+    backend: sklearn
+    module: sklearn.linear_model
+    class: ElasticNet
+
+  decision_tree_regressor:
+    backend: sklearn
+    module: sklearn.tree
+    class: DecisionTreeRegressor
+
+  random_forest_regressor:
+    backend: sklearn
+    module: sklearn.ensemble
+    class: RandomForestRegressor
+
+  gradient_boosting_regressor:
+    backend: sklearn
+    module: sklearn.ensemble
+    class: GradientBoostingRegressor
+
+  hist_gradient_boosting_regressor:
+    backend: sklearn
+    module: sklearn.ensemble
+    class: HistGradientBoostingRegressor
+
+  svm_regressor:
+    backend: sklearn
+    module: sklearn.svm
+    class: SVR
+
+
+  # ==================================================
+  # Gradient Boosting externes
+  # ==================================================
+
+  xgboost_classifier:
+    backend: xgboost
+    module: xgboost
+    class: XGBClassifier
+
+  xgboost_regressor:
+    backend: xgboost
+    module: xgboost
+    class: XGBRegressor
+
+  lightgbm_classifier:
+    backend: lightgbm
+    module: lightgbm
+    class: LGBMClassifier
+
+  lightgbm_regressor:
+    backend: lightgbm
+    module: lightgbm
+    class: LGBMRegressor
+
+  catboost_classifier:
+    backend: catboost
+    module: catboost
+    class: CatBoostClassifier
+
+  catboost_regressor:
+    backend: catboost
+    module: catboost
+    class: CatBoostRegressor
+
+
+  # ==================================================
+  # Clustering
+  # ==================================================
+
+  kmeans:
+    backend: sklearn
+    module: sklearn.cluster
+    class: KMeans
+
+  dbscan:
+    backend: sklearn
+    module: sklearn.cluster
+    class: DBSCAN
+
+  hierarchical_clustering:
+    backend: sklearn
+    module: sklearn.cluster
+    class: AgglomerativeClustering
+
+
+  # ==================================================
+  # Réduction de dimension
+  # ==================================================
+
+  pca:
+    backend: sklearn
+    module: sklearn.decomposition
+    class: PCA
+
+
+  # ==================================================
+  # Deep Learning - TensorFlow/Keras
+  # ==================================================
+
+  keras_sequential:
+    backend: tensorflow
+    module: tensorflow.keras.models
+    class: Sequential
+
+
+  # ==================================================
+  # Deep Learning - PyTorch
+  # ==================================================
+
+  resnet18:
+    backend: pytorch
+    module: torchvision.models
+    class: resnet18
+
+  resnet50:
+    backend: pytorch
+    module: torchvision.models
+    class: resnet50
