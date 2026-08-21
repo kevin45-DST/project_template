@@ -36,8 +36,11 @@ class TrackingPipeline:
         """
         self.tracking_manager = TrackingManager.create()
         
+<<<<<<< HEAD
         self.logger = LogCollectorManager()
         
+=======
+>>>>>>> 1c0e36035e39e51a1b74a2deaf9f4358c4df4c9f
     def get_runs_to_track(self):
         """
         Identifie les runs qui doivent encore être trackés.

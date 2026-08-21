@@ -27,6 +27,10 @@ Conformément à l'architecture du projet, chaque sous-module est strictement s�
 ## 💡 Philosophie d'Extension
 
 Si vous devez ajouter un nouveau moyen de sauvegarder un modèle (par exemple via *Pickle* ou un *Blob Storage Azure*) :
+<<<<<<< HEAD
 1. Créez votre classe dans `project.yaml`.
+=======
+1. Créez votre classe dans `persistence/implementations/`.
+>>>>>>> 1c0e36035e39e51a1b74a2deaf9f4358c4df4c9f
 2. Héritez de `ModelPersistenceBackend`.
 3. Enregistrez votre nouvelle classe dans le fichier de mapping de configuration adéquat.

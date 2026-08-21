@@ -42,6 +42,12 @@ class MLFlowBackend(TrackingBackend):
         La configuration détermine notamment le nom de l'expérience,
         l'emplacement de la base MLflow et le répertoire des artefacts.
         """
+<<<<<<< HEAD
+=======
+        paths_config = ConfigManager(
+            "config/paths.yaml"
+        )
+>>>>>>> 1c0e36035e39e51a1b74a2deaf9f4358c4df4c9f
         
         project_config = ConfigManager(
             "config/project.yaml"

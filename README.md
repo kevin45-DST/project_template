@@ -1,4 +1,4 @@
-# 🧠 ML Framework & Toolbox — Une ingénierie Machine Learning lisible, modulaire et durable
+# 🧠 HephAIstOS — Une ingénierie Machine Learning lisible, modulaire et durable
 
 ## 🎯 Pourquoi ce projet existe
 
@@ -11,7 +11,8 @@ Les principaux problèmes apparaissent souvent autour :
 * du préprocessing dispersé ;
 * de la duplication de code ;
 * du manque de reproductibilité ;
-* de la difficulté à comparer correctement les résultats.
+* de la difficulté à comparer correctement les résultats ;
+* de la difficulté à suivre et tracer les différentes exécutions.
 
 Après près de 20 ans d'expérience en développement logiciel et architecture technique, ce projet est né d'un constat :
 
@@ -33,7 +34,8 @@ Les objectifs sont :
 * séparer clairement les responsabilités ;
 * favoriser la compréhension plutôt que l'abstraction excessive ;
 * permettre la réutilisation sans créer de boîte noire ;
-* construire progressivement une architecture cohérente.
+* construire progressivement une architecture cohérente ;
+* conserver une trace exploitable des expériences.
 
 Le framework privilégie :
 
@@ -53,7 +55,7 @@ Toolbox : capacités Data Science et Machine Learning
 
 Decision Helper : analyse et visualisation des résultats
 
-MLOps : industrialisation du cycle de vie
+MLOps : suivi et industrialisation du cycle de vie
 
 ---
 
@@ -69,7 +71,10 @@ Son rôle est de coordonner :
 * les pipelines d'expérimentation ;
 * l'entraînement des modèles ;
 * la génération des résultats ;
-* la préparation des artefacts.
+* la persistance des artefacts ;
+* l'identification et le suivi des runs.
+
+Chaque exécution significative du framework est associée à un **run** identifié de manière unique.
 
 Le framework ne décide pas :
 
@@ -89,7 +94,7 @@ Elle est organisée par intention fonctionnelle et non par librairie technique.
 
 Exemple :
 
-```
+```text
 ml_toolbox/
 
     preprocessing/
@@ -120,7 +125,7 @@ ml_toolbox/
 
 L'objectif est une compréhension immédiate :
 
-```
+```text
 preprocessing
     |
     +-- balancing
@@ -189,6 +194,8 @@ Il permet :
 * comparer plusieurs stratégies d'entraînement ;
 * produire des résultats exploitables.
 
+Chaque recherche est associée à un run permettant d'identifier et de retrouver les résultats produits.
+
 ---
 
 ## TrainingPipeline
@@ -205,6 +212,70 @@ Il réalise :
 
 Il ne réalise pas la recherche de modèle.
 
+Chaque entraînement est associé à un run permettant de regrouper les résultats, métriques, artefacts et informations de traçabilité produits pendant l'exécution.
+
+---
+
+# 🧠 Gestion des runs
+
+Le framework considère chaque expérimentation comme une unité identifiable.
+
+Un **run** regroupe les éléments produits par une exécution :
+
+* identifiant unique ;
+* paramètres ;
+* métriques ;
+* résultats d'évaluation ;
+* artefacts ;
+* métadonnées ;
+* informations de statut.
+
+Les informations sont persistées afin de permettre leur exploitation ultérieure, indépendamment du pipeline qui les a produites.
+
+Cette séparation permet notamment de :
+
+* retrouver une expérimentation ;
+* comparer plusieurs runs ;
+* reprendre ou analyser une exécution ayant échoué ;
+* préparer les données nécessaires au tracking MLOps.
+
+---
+
+# 📊 Gestion des résultats
+
+Les résultats d'expérimentation sont séparés du processus d'entraînement.
+
+Les pipelines produisent des objets contenant notamment :
+
+* paramètres utilisés ;
+* métriques ;
+* scores de validation ;
+* matrices de confusion ;
+* informations sur le modèle.
+
+Ces résultats sont associés au run courant et peuvent ensuite être exploités par :
+
+* ReportManager ;
+* Decision Helper ;
+* futurs outils MLOps.
+
+Les rapports et artefacts sont ainsi persistés avant d'être exploités par les composants qui en ont besoin.
+
+---
+
+# 🔄 Recovery
+
+Le framework intègre également des mécanismes permettant de détecter et de gérer certaines incohérences ou échecs affectant les runs et leurs registres.
+
+L'objectif est de ne pas considérer une exécution interrompue comme une situation nécessitant systématiquement une intervention manuelle.
+
+Les mécanismes de recovery permettent notamment de :
+
+* détecter certaines incohérences dans les informations d'un run ;
+* restaurer ou compléter les informations nécessaires ;
+* conserver la trace d'une exécution ayant échoué ;
+* préparer les runs pour les traitements MLOps ultérieurs.
+
 ---
 
 # 🧠 Decision Helper
@@ -220,7 +291,8 @@ Il permet notamment :
 * visualisation des métriques ;
 * consultation des matrices de confusion ;
 * comparaison des résultats ;
-* analyse des performances modèles.
+* analyse des performances modèles ;
+* consultation des différents runs.
 
 Il ne :
 
@@ -232,23 +304,57 @@ La décision finale reste celle du Data Scientist.
 
 ---
 
-# 📊 Gestion des résultats
+# 🔭 MLOps
 
-Les résultats d'expérimentation sont séparés du processus d'entraînement.
+La couche MLOps a pour objectif d'exploiter les informations produites par les expériences sans imposer leur mode de production aux pipelines.
 
-Les pipelines produisent des objets contenant :
+Le framework privilégie une approche progressive :
 
-* paramètres utilisés ;
-* métriques ;
-* scores de validation ;
-* matrices de confusion ;
-* informations sur le modèle.
+```text
+Run
+  |
+  +-- Reports
+  |
+  +-- Artifacts
+  |
+  +-- Metadata
+  |
+  +-- Registry
+        |
+        ▼
+   Tracking
+```
 
-Ces résultats peuvent ensuite être exploités par :
+Le tracking est ainsi considéré comme une étape d'exploitation des informations produites par les expériences, et non comme une responsabilité directe de l'entraînement.
 
-* ReportManager ;
-* Decision Helper ;
-* futurs outils MLOps.
+Le framework prévoit notamment l'utilisation de backends de tracking tels que MLflow, tout en conservant une abstraction permettant d'éviter un couplage direct avec une technologie particulière.
+
+---
+
+# 📝 Logging
+
+La gestion des logs suit le même principe de séparation des responsabilités.
+
+Le framework prévoit un `LoggingManager` chargé de centraliser la production et la persistance des événements d'exécution.
+
+Les logs doivent être considérés comme des données persistées avant d'être exploitées par d'autres composants.
+
+À terme, cette approche permettra notamment de séparer :
+
+```text
+Application
+    |
+    ▼
+LoggingManager
+    |
+    ▼
+Log storage
+    |
+    ▼
+Visualisation / Monitoring
+```
+
+Le système de logging pourra ainsi évoluer indépendamment des outils de visualisation ou de monitoring utilisés.
 
 ---
 
@@ -278,6 +384,14 @@ Le framework privilégie :
 
 Plusieurs composants simples sont préférés à une architecture complexe difficile à maintenir.
 
+## 5. Les abstractions comme outils de conception
+
+Les abstractions ne sont pas ajoutées uniquement pour masquer une implémentation.
+
+Elles servent à définir clairement les responsabilités et à permettre au framework d'évoluer sans imposer une technologie particulière à ses utilisateurs.
+
+Une abstraction doit donc répondre à un besoin architectural réel.
+
 ---
 
 # 🧪 Ce que ce projet n'est pas
@@ -285,7 +399,8 @@ Plusieurs composants simples sont préférés à une architecture complexe diffi
 * ❌ un AutoML boîte noire ;
 * ❌ un remplacement de scikit-learn ;
 * ❌ un framework imposant une méthode unique ;
-* ❌ une abstraction masquant les mécanismes ML.
+* ❌ une abstraction masquant les mécanismes ML ;
+* ❌ une plateforme MLOps imposant un fournisseur ou un outil particulier.
 
 ---
 
@@ -296,7 +411,10 @@ Plusieurs composants simples sont préférés à une architecture complexe diffi
 * réduction de la duplication ;
 * meilleure collaboration ;
 * réutilisation simple des briques ML ;
-* séparation nette entre outils et orchestration.
+* séparation nette entre outils et orchestration ;
+* identification et suivi des expérimentations ;
+* persistance structurée des résultats et artefacts ;
+* préparation progressive à l'industrialisation MLOps.
 
 ---
 
@@ -310,13 +428,17 @@ Les fondations principales sont :
 ✅ toolbox organisée par domaines
 ✅ pipelines spécialisés
 ✅ génération de rapports
+✅ gestion des runs
+✅ registres d'expérimentation
+✅ mécanismes de recovery
 ✅ Decision Helper
-✅ gestion des résultats d'expérimentation
+✅ abstractions pour le tracking MLOps
 
 Les prochaines évolutions concernent notamment :
 
 * enrichissement du preprocessing ;
 * amélioration de l'aide à la décision ;
+* finalisation du système de logging ;
 * intégration MLOps ;
 * déploiement et monitoring.
 
@@ -334,7 +456,7 @@ git clone <repo_url>
 
 Exemple :
 
-```
+```text
 ml-framework-template/
 
         →
@@ -346,19 +468,19 @@ votre_projet/
 
 Windows PowerShell :
 
-```
+```text
 scripts/init_env.ps1
 ```
 
 Windows CMD :
 
-```
+```text
 scripts/init_env.bat
 ```
 
 Unix / MacOS :
 
-```
+```text
 scripts/init_env.sh
 ```
 
@@ -380,3 +502,5 @@ L'objectif de ce projet est de construire progressivement un environnement Machi
 * évolutif ;
 * réutilisable ;
 * durable.
+
+HephAIstOS cherche avant tout à fournir les outils permettant de **construire, comprendre, suivre et faire évoluer** les projets Machine Learning sans masquer leur complexité derrière une boîte noire.
