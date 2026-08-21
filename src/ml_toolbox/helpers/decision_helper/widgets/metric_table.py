@@ -31,12 +31,27 @@ class MetricTable:
         metrics: pd.DataFrame,
         report_path: Path,
     ) -> None:
+        """
+        Initialise le composant d'affichage des métriques.
 
+        Parameters
+        ----------
+        metrics : pandas.DataFrame
+            Métriques des modèles à afficher.
+
+        report_path : Path
+            Répertoire du run actuellement affiché.
+        """
         self.metrics = metrics
         self.report_path = report_path
 
     def show(self):
+        """
+        Affiche les métriques des modèles et les actions disponibles.
 
+        Un bouton permet notamment de demander l'affichage de la matrice
+        de confusion associée à chaque modèle.
+        """
         for _, row in self.metrics.iterrows():
 
             c1, c2 = st.columns(

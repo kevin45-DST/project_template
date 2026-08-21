@@ -20,7 +20,20 @@ class SklearnEvaluationBackend(
     EvaluationBackend
 ):
     """
-    Implémentation de l'évaluation pour Scikit-learn.
+    Backend d'évaluation utilisant Scikit-learn.
+
+    Cette classe utilise l'API de prédiction du modèle ainsi que les
+    fonctions d'évaluation de Scikit-learn pour calculer les métriques
+    de classification et la matrice de confusion.
+
+    Parameters
+    ----------
+    model : Any
+        Modèle entraîné compatible avec l'API de prédiction de
+        Scikit-learn.
+
+    dataset : Dataset
+        Dataset contenant les données de test utilisées pour l'évaluation.
     """
 
     def __init__(
@@ -28,7 +41,17 @@ class SklearnEvaluationBackend(
         model: Any,
         dataset,
     ) -> None:
+        """
+        Initialise le backend d'évaluation.
 
+        Parameters
+        ----------
+        model : Any
+            Modèle entraîné à évaluer.
+
+        dataset : Dataset
+            Dataset contenant les données de test.
+        """
         self.model = model
         self.dataset = dataset
 
@@ -36,7 +59,15 @@ class SklearnEvaluationBackend(
     def evaluate(
         self,
     ) -> dict:
+        """
+        Évalue le modèle sur le jeu de test.
 
+        Returns
+        -------
+        dict
+            Dictionnaire contenant les métriques de classification et
+            la matrice de confusion.
+        """
         y_pred = self.model.predict(
             self.dataset.x_test
         )

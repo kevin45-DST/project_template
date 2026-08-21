@@ -1,22 +1,29 @@
+# Syntaxe : ${NOM_VARIABLE:-valeur_par_defaut}
 project:
   name: credit_card_fraud_detection
+
 training:
   backend: scikitlearn
+
 model:
   name: random_forest_classifier
+
   params:
     max_depth: null
     n_estimators: 200
+
   persistence:
     type: joblib
+
 tracking:
   backend: mlflow
-  uri: http://localhost:5000
+  uri: "{{?MLFLOW_URI}}"
   type: sqlite
   store_name: mlflow.db
+
 logs:
   file_size_max: 50MB
-  level: 0
+  level: "{{LOG_LEVEL}}"
   storage:
     backend: elasticsearch
-    url: http://localhost:9200
+    url: "{{LOG_STORAGE_URL}}"

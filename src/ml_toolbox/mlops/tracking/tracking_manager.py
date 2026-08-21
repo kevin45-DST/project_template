@@ -33,15 +33,15 @@ class TrackingManager:
             Gestionnaire de tracking configuré.
         """
 
-        implementations_config = ConfigManager(
-            "config/implementations.yaml"
+        project_config = ConfigManager(
+            "config/project.yaml"
         )
 
         mapping_config = ConfigManager(
             "config/mappings/tracking.yaml"
         )
 
-        backend_name = implementations_config.get(
+        backend_name = project_config.get(
             "tracking.backend"
         )
 

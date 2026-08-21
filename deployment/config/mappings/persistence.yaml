@@ -1,0 +1,3 @@
+joblib:
+  module: src.ml_toolbox.transversal.persistence.implementations.joblib_backend
+  class: JoblibPersistenceBackend

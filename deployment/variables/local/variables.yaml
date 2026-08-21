@@ -1,0 +1,4 @@
+PROJECT_ROOT_FOLDER: "D:/projets/credit_card_fraud_detection"
+MLFLOW_URI: "http://localhost:5000"
+LOG_STORAGE_URL: "http://localhost:9200"
+LOG_LEVEL: 0

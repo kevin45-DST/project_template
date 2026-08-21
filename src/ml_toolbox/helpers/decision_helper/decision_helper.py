@@ -41,13 +41,22 @@ class DecisionHelper:
     def __init__(
         self,
     ) -> None:
+        
+        """
+        Initialise le DecisionHelper.
+
+        La configuration du framework est utilisée pour déterminer le
+        répertoire contenant les rapports de recherche.
+        """
         config = ConfigManager(
                 "config/paths.yaml"
                 )
         self.report_path = Path(config.get("project.root_folder")) / config.get("reports.root_folder") / config.get("reports.search")
 
     def run(self) -> None:
-
+        """
+        Lance l'interface utilisateur du DecisionHelper.
+        """
         launcher = Launcher(
             self.report_path,
         )

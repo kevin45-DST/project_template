@@ -28,11 +28,23 @@ class Launcher:
         self,
         report_path: Path,
     ) -> None:
+        """
+        Initialise le lanceur du DecisionHelper.
 
+        Parameters
+        ----------
+        report_path : Path
+            Répertoire racine contenant les rapports à analyser.
+        """
         self.report_path = report_path
 
     def run(self) -> None:
+        """
+        Démarre l'application Streamlit du DecisionHelper.
 
+        Le chemin des rapports est transmis à l'application via la variable
+        d'environnement ``DECISION_HELPER_REPORT_PATH``.
+        """
         os.environ["DECISION_HELPER_REPORT_PATH"] = str(
             self.report_path
         )

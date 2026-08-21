@@ -18,7 +18,9 @@ class JoblibPersistenceBackend(ModelPersistenceBackend):
     """
     
     def __init__(self):
-        
+        """
+        Initialise le backend de persistance basé sur Joblib.
+        """
         paths_config = ConfigManager(
             "config/paths.yaml"
         )

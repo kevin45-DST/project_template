@@ -26,7 +26,18 @@ class ConfusionMatrix:
         matrix: dict,
         label: str
     ) -> None:
+        """
+        Affiche une matrice de confusion dans une boîte de dialogue.
 
+        Parameters
+        ----------
+        matrix : dict
+            Données de la matrice de confusion, comprenant les classes
+            et les valeurs de la matrice.
+
+        label : str
+            Nom du modèle ou du résultat affiché dans le titre.
+        """
         labels = matrix["classes"]
 
         dataframe = pd.DataFrame(

@@ -129,6 +129,18 @@ class ReportManager:
         config = ConfigManager(
             "config/paths.yaml"
         )
+        """
+        Initialise le gestionnaire de rapports pour un run.
+
+        Parameters
+        ----------
+        run_id : str
+            Identifiant du run auquel les rapports appartiennent.
+
+        mode : str, default="training"
+            Type de rapport à gérer. Les valeurs actuellement supportées
+            sont ``"training"`` et ``"search"``.
+        """
         if mode == "training":
             self.reports_path = Path(config.get("project.root_folder")) / config.get("reports.root_folder") / config.get("reports.training")
         elif mode == "search":
@@ -144,35 +156,33 @@ class ReportManager:
                          labels: list[str],
                          duration: float = 0) -> Path:
         """
-        Génère un rapport contenant les résultats d'évaluation des modèles.
+        Génère les rapports associés au run courant.
 
-        Le contenu du rapport dépend du type de résultat fourni :
+        Le contenu du rapport dépend du mode configuré :
 
-        - TrainingResult :
-            Génération d'un rapport pour un modèle entraîné.
+        - en mode ``training``, un rapport est généré pour le modèle entraîné ;
+        - en mode ``search``, un rapport comparatif est généré pour les
+          résultats de recherche des modèles.
 
-        - SearchTrainingResult :
-            Génération d'un rapport comparatif contenant les résultats de
-            recherche d'hyperparamètres pour plusieurs modèles.
-
-        Les métriques générées sont destinées à être consultées par des outils
-        d'analyse et d'aide à la décision.
+        Les rapports sont stockés dans le répertoire associé au ``run_id``
+        fourni lors de l'initialisation.
 
         Parameters
         ----------
         results : TrainingResult | list[SearchTrainingResult]
-            Résultat(s) d'entraînement à exporter.
+            Résultat d'entraînement ou liste des résultats de recherche.
 
         labels : list[str]
-            Classes utilisées pour annoter les matrices de confusion.
+            Classes utilisées pour générer les matrices de confusion.
 
-        training_date : str | None
-            Identifiant temporel utilisé pour nommer les fichiers générés.
+        duration : float, default=0
+            Durée de l'entraînement en secondes. Utilisée pour les rapports
+            en mode ``training``.
 
         Returns
         -------
         Path
-            Chemin du répertoire contenant le rapport généré.
+            Chemin du répertoire contenant les rapports du run.
         """
 
         rows = []
@@ -245,32 +255,28 @@ class ReportManager:
         matrix: Any
     ) -> Path:
         """
-        Sauvegarde une matrice de confusion au format JSON.
+        Sauvegarde une matrice de confusion associée au run courant.
 
-        La matrice sauvegardée permet une visualisation ultérieure dans les
-        outils d'analyse du framework.
+        La matrice est enregistrée au format JSON dans le répertoire
+        ``confusion_matrix`` du run et une représentation graphique est
+        également générée dans le répertoire ``artifacts``.
 
         Parameters
         ----------
         label : str
-            Identifiant associé au modèle ou à l'expérience.
+            Identifiant du modèle ou du résultat auquel la matrice est
+            associée.
 
         classes : list[str]
-            Liste des classes du problème de classification.
+            Classes du problème de classification.
 
         matrix : Any
             Matrice de confusion calculée lors de l'évaluation.
 
-        directory : str
-            Sous-répertoire de stockage.
-
-        training_date : str | None
-            Date ou identifiant temporel utilisé dans le nom du fichier.
-
         Returns
         -------
         Path
-            Chemin du fichier JSON généré.
+            Chemin du fichier image généré dans le répertoire ``artifacts``.
         """
 
         data = {
@@ -394,13 +400,16 @@ class ReportManager:
         metadata: dict,
     ) -> None:
         """
-        Génère le fichier metadata.json associé à l'expérience.
+        Génère le fichier ``metadata.json`` associé au run.
 
         Parameters
         ----------
+        metadata_path : Path
+            Répertoire dans lequel le fichier ``metadata.json`` doit être
+            enregistré.
+
         metadata : dict
-            Informations complémentaires de traçabilité
-            de l'expérience.
+            Informations de traçabilité associées au run.
         """
 
         metadata_file = (
@@ -425,58 +434,49 @@ class ReportManager:
             self,
             registry_data: dict,
         ) -> None:
-            """
-            Génère le fichier run_registry.json associé à l'expérience.
+        """
+        Génère le registre local du run.
+
+        Parameters
+        ----------
+        registry_data : dict
+            Informations à enregistrer dans le registre local.
+        """
     
-            Parameters
-            ----------
-            data : dict
-                Informations complémentaires de suivi
-                de l'expérience.
-            """
+        registry_file = (
+            self.reports_run_path
+            / "run_registry.json"
+        )
     
-            registry_file = (
-                self.reports_run_path
-                / "run_registry.json"
-            )
+        with open(
+            registry_file,
+            "w",
+            encoding="utf-8",
+        ) as file:
     
-            with open(
-                registry_file,
-                "w",
-                encoding="utf-8",
-            ) as file:
-    
-                json.dump(
-                    registry_data,
-                    file,
-                    indent=4,
-                    ensure_ascii=False,
-                )
+            json.dump(
+                registry_data,
+                file,
+                indent=4,
+                ensure_ascii=False,
+        )
                 
     def update_runs_registry(
             self,
             registry_data: dict,
         ) -> None:
         """
-        Met à jour le registre global des expériences.
+        Met à jour le registre global des runs.
 
-        Si le fichier runs_registry.json n'existe pas,
-        il est créé avec la nouvelle expérience.
+        Si le registre global n'existe pas, il est créé.
 
-        Si le fichier existe, la nouvelle expérience est ajoutée
-        à la liste des expériences. Si une expérience possédant
-        le même identifiant existe déjà, ses informations sont
-        mises à jour afin d'éviter les doublons.
+        Si le run existe déjà, ses informations sont mises à jour.
+        Dans le cas contraire, le run est ajouté au registre.
 
         Parameters
         ----------
-        run_data : dict
-            Informations de suivi de l'expérience.
-            Exemple :
-            {
-                "run_id": "run_20260728_145612",
-                "training_status": "Done"
-            }
+        registry_data : dict
+            Informations du run à ajouter ou mettre à jour.
         """
 
         registry_path = self.reports_path / "runs_registry.json"
@@ -526,25 +526,25 @@ class ReportManager:
         info_value: str,
     ) -> None:
         """
-        Ajoute/modifie une information du run.
+        Ajoute ou met à jour une information associée au run courant.
 
-        L'info est ajoutée dans le registre local de l'expérience
-        ainsi que dans le registre global des expériences.
+        L'information est enregistrée dans le registre local du run puis
+        propagée au registre global.
 
         Parameters
         ----------
-        run_id : str
-            Identifiant de l'expérience.
-
         info_name : str
-            Nom de l"information à ajouter.
-            Exemple :
-            "training_status", "tracking_status", "tracking_message"
+            Nom de l'information à enregistrer.
 
         info_value : str
-            Valeur de l'information.
-            Exemple :
-            "Done", "Failed", "exception message"
+            Valeur associée à l'information.
+
+        Examples
+        --------
+        >>> report_manager.update_run_info(
+        ...     "training_status",
+        ...     "success",
+        ... )
         """
 
         # -------------------------
@@ -599,67 +599,53 @@ class ReportManager:
     def get_runs_registry(
             self
         ) -> dict:
-            """
-            Récupère les informations de suivi d'une expérience.
+        """
+        Récupère le registre global des runs.
 
-            La méthode lit le registre global de l'expérience
-            et retourne son contenu sous forme de dictionnaire.
+        Returns
+        -------
+        dict
+            Contenu du registre global.
 
-            Parameters
-            ----------
+        Raises
+        ------
+        FileNotFoundError
+            Si le registre global n'existe pas.
+        """
 
-            Returns
-            -------
-            dict
-                Informations associées à l'expérience.
+        run_path = (
+            self.reports_path
+            / "runs_registry.json"
+        )
 
-            Raises
-            ------
-            FileNotFoundError
-                Si le registre global de l'expérience n'existe pas.
-            """
-
-            run_path = (
-                self.reports_path
-                / "runs_registry.json"
+        if not run_path.exists():
+            raise FileNotFoundError(
+                f"Le registre de l'expérience '{self.run_id}' "
+                f"est introuvable : {run_path}"
             )
 
-            if not run_path.exists():
-                raise FileNotFoundError(
-                    f"Le registre de l'expérience '{self.run_id}' "
-                    f"est introuvable : {run_path}"
-                )
-
-            with open(
-                run_path,
-                "r",
-                encoding="utf-8",
-            ) as file:
-                return json.load(file)
+        with open(
+            run_path,
+            "r",
+            encoding="utf-8",
+        ) as file:
+            return json.load(file)
 
     def get_run_registry(
         self
     ) -> dict:
         """
-        Récupère les informations de suivi dun run.
-
-        La méthode lit le registre local associé au run
-        et retourne son contenu sous forme de dictionnaire.
-
-        Parameters
-        ----------
-        run_id : str
-            Identifiant du run.
+        Récupère le registre local du run courant.
 
         Returns
         -------
         dict
-            Informations associées à l'expérience.
+            Informations enregistrées dans le registre du run.
 
         Raises
         ------
         FileNotFoundError
-            Si le registre local de l'expérience n'existe pas.
+            Si le registre local du run n'existe pas.
         """
 
         run_path = (
@@ -684,45 +670,40 @@ class ReportManager:
     def get_run_report(
             self
         ) -> dict:
-            """
-            Récupère les données d'une expérience.
+        """
+        Récupère le rapport du run courant.
+
+        Le rapport est chargé depuis le fichier ``report.csv`` associé
+        au run géré par cette instance de ``ReportManager``.
+
+        Returns
+        -------
+        dict
+            Contenu du rapport.
+
+        Raises
+        ------
+        FileNotFoundError
+            Si le fichier ``report.csv`` du run n'existe pas.
+        """
     
-            La méthode lit le report.csv local associé à l'expérience
-            et retourne son contenu sous forme de dictionnaire.
+        run_path = (
+            self.reports_path
+            / self.run_id
+        )
     
-            Parameters
-            ----------
-            run_id : str
-                Identifiant de l'expérience recherchée.
-    
-            Returns
-            -------
-            dict
-                Informations associées à l'expérience.
-    
-            Raises
-            ------
-            FileNotFoundError
-                Si le fichier report.csv local de l'expérience n'existe pas.
-            """
-    
-            run_path = (
-                self.reports_path
-                / self.run_id
+        if not run_path.exists():
+            raise FileNotFoundError(
+                f"Le registre de l'expérience '{self.run_id}' "
+                f"est introuvable : {run_path}"
             )
     
-            if not run_path.exists():
-                raise FileNotFoundError(
-                    f"Le registre de l'expérience '{self.run_id}' "
-                    f"est introuvable : {run_path}"
-                )
-    
-            report = pd.read_csv(run_path / "report.csv")
+        report = pd.read_csv(run_path / "report.csv")
                 
-            report_dict: dict[str, float] = {
-                str(key): float(value)
-                for key, value in (
-                    report.drop(columns=["model"]).iloc[0].items()
-                    )
-                }
-            return report_dict
+        report_dict: dict[str, float] = {
+            str(key): float(value)
+            for key, value in (
+                report.drop(columns=["model"]).iloc[0].items()
+                )
+            }
+        return report_dict

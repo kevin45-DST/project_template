@@ -31,11 +31,30 @@ class Dashboard:
         self,
         report_path: Path,
     ) -> None:
+        """
+        Charge une matrice de confusion depuis le run courant.
 
+        Parameters
+        ----------
+        run_id : str
+            Identifiant du modèle ou du résultat dont la matrice doit être
+            chargée.
+
+        Returns
+        -------
+        dict
+            Données de la matrice de confusion, comprenant les classes et
+            les valeurs de la matrice.
+        """
         self.report_path = report_path
 
     def run(self) -> None:
-        
+        """
+        Affiche le tableau de bord du DecisionHelper.
+
+        Les runs disponibles sont proposés dans la barre latérale.
+        La sélection d'un run charge son rapport et affiche ses métriques.
+        """
         runs = MetricsLoader(
             self.report_path
         ).list_runs()

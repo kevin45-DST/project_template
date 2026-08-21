@@ -38,13 +38,31 @@ class MetricsView:
         report_path: Path,
         run_id: str,
     ) -> None:
+        """
+        Initialise la vue des métriques d'un run.
 
+        Parameters
+        ----------
+        metrics : pandas.DataFrame
+            Métriques à afficher.
+
+        report_path : Path
+            Répertoire contenant les rapports du run courant.
+
+        run_id : str
+            Identifiant du run affiché.
+        """
         self.metrics = metrics
         self.report_path = report_path
         self.run_id = run_id
 
     def show(self):
+        """
+        Affiche les métriques et les interactions disponibles pour le run.
 
+        La vue affiche notamment le tableau des métriques et permet
+        d'ouvrir les visualisations complémentaires.
+        """
         st.title("Decision Helper")
         
         st.subheader(f"Run : {self.run_id}")
@@ -57,7 +75,13 @@ class MetricsView:
         self._handle_events()
 
     def _handle_events(self):
+        """
+        Traite les interactions utilisateur enregistrées dans la session
+        Streamlit.
 
+        Les événements permettent notamment d'afficher une matrice de
+        confusion associée au modèle sélectionné.
+        """
         selected_view = st.session_state.get(
             "selected_view"
         )
@@ -71,10 +95,6 @@ class MetricsView:
 
         if model_label is None:
             return
-
-        run_id = st.session_state.get(
-            "selected_run"
-        )
 
         loader = MetricsLoader(
             self.report_path

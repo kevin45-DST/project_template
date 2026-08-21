@@ -1,0 +1,4 @@
+PROJECT_ROOT_FOLDER: "/app"
+MLFLOW_URI: "http://mlflow:5000"
+LOG_STORAGE_URL: "http://elasticsearch:9200"
+LOG_LEVEL: 1
