@@ -1,0 +1,23 @@
+log_levels:
+  0:
+    - DEBUG
+    - INFO
+    - WARNING
+    - ERROR
+  1:
+    - INFO
+    - WARNING
+    - ERROR
+  2:
+    - WARNING
+    - ERROR
+  3:
+    - ERROR
+
+loki:
+  module: src.ml_toolbox.transversal.logs.log_storage.implementations.loki_backend
+  class: LokiBackend
+
+elasticsearch:
+  module: src.ml_toolbox.transversal.logs.log_storage.implementations.elasticsearch_backend
+  class: ElasticSearchBackend

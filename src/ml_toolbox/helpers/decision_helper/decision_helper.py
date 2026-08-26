@@ -1,0 +1,70 @@
+# Copyright © 2026 Kévin DELANOUE
+# License: see LICENSE
+
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent.parent))
+
+from src.ml_toolbox.helpers.decision_helper.launcher import Launcher
+from config.config_manager import ConfigManager
+
+
+class DecisionHelper:
+    
+    """
+    Point d'entrée principal de l'outil d'aide à la décision.
+
+    Le DecisionHelper fournit une interface permettant au Data Scientist
+    d'analyser les résultats produits par les pipelines d'entraînement.
+
+    Il charge la configuration du framework afin de récupérer l'emplacement
+    des rapports générés, puis initialise l'interface utilisateur.
+
+    Le DecisionHelper ne réalise pas :
+
+    - l'entraînement des modèles ;
+    - la recherche d'hyperparamètres ;
+    - le calcul des métriques ;
+    - la sélection automatique du meilleur modèle ;
+    - le suivi MLOps.
+
+    Son rôle est de faciliter l'analyse et la comparaison des résultats
+    grâce à une interface de visualisation.
+
+    Examples
+    --------
+    >>> helper = DecisionHelper()
+    >>> helper.run()
+    """
+
+    def __init__(
+        self,
+    ) -> None:
+        
+        """
+        Initialise le DecisionHelper.
+
+        La configuration du framework est utilisée pour déterminer le
+        répertoire contenant les rapports de recherche.
+        """
+        config = ConfigManager(
+                "config/paths.yaml"
+                )
+        self.report_path = Path(config.get("project.root_folder")) / config.get("reports.root_folder") / config.get("reports.search")
+
+    def run(self) -> None:
+        """
+        Lance l'interface utilisateur du DecisionHelper.
+        """
+        launcher = Launcher(
+            self.report_path,
+        )
+
+        launcher.run()
+        
+if __name__ == "__main__":
+
+    helper = DecisionHelper()
+
+    helper.run()

@@ -1,0 +1,7 @@
+sklearn:
+  module: src.ml_toolbox.transversal.evaluation.implementations.scikit_learn_backend
+  class: SklearnEvaluationBackend
+
+xgboost:
+  module: src.ml_toolbox.transversal.evaluation.implementations.xgboost_backend
+  class: XGBoostEvaluationBackend

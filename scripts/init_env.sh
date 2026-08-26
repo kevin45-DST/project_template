@@ -1,6 +1,11 @@
 #!/bin/bash
+cd ..
 
 ProjectName=$(basename "$PWD")
+
+echo "====================================="
+echo "Executing in $ProjectName"
+echo "====================================="
 
 echo "====================================="
 echo "Creating virtual environment..."
@@ -69,6 +74,7 @@ for %%D in (
     src
     tests
     notebooks
+    config
 ) do (
     if not exist "%%D" (
         mkdir "%%D"
@@ -77,6 +83,31 @@ for %%D in (
         echo Already exists %%D
     )
 )
+
+
+echo =====================================
+echo initialisation paths.yaml...
+echo =====================================
+
+PROJECT_root_folder="$(pwd)"
+
+cat > config/paths.yaml <<EOF
+project:
+  root_folder: "$PROJECT_root_folder"
+
+data:
+  root_folder: data 
+  raw: raw
+  processed: processed
+
+models:
+  root_folder: models
+
+reports:
+  root_folder: reports
+  search: search
+  training: training
+EOF
 
 echo ""
 echo "====================================="

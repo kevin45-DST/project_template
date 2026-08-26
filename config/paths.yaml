@@ -1,0 +1,19 @@
+project:
+  root_folder: D:/projets/credit_card_fraud_detection
+data:
+  root_folder: data
+  raw: raw
+  processed: processed
+persistence:
+  root_folder: models
+reports:
+  root_folder: reports
+  search: search
+  training: training
+tracking:
+  root_folder: tracking
+  mlflow:
+    root_folder: mlflow
+    artifacts: artifacts
+logs:
+  root_folder: logs
